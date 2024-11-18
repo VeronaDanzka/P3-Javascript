@@ -16,19 +16,19 @@ async function loadData() {
 // Fonction pour ajouter les boutons categories
 function createBtns(categories){
     const btnsContainer = document.querySelector('.btns-container');
-    const btnFiltreAll = document.createElement('button');
-    btnFiltreAll.setAttribute('aria-selected', 'true');
-    btnFiltreAll.className = 'btn-filter';
-    btnFiltreAll.dataset.category = 'all';
-    btnFiltreAll.textContent = 'Tous';
-    btnsContainer.appendChild(btnFiltreAll);
+    const btnFilterAll = document.createElement('button');
+    btnFilterAll.setAttribute('aria-selected', 'true');
+    btnFilterAll.className = 'btn-filter';
+    btnFilterAll.dataset.category = 'all';
+    btnFilterAll.textContent = 'Tous';
+    btnsContainer.appendChild(btnFilterAll);
     categories.forEach(category => {
-        const btnFiltre = document.createElement('button');
-        btnFiltre.setAttribute('aria-selected', 'false');
-        btnFiltre.className = 'btn-filter';
-        btnFiltre.dataset.category = category.id;
-        btnFiltre.textContent = category.name;
-        btnsContainer.appendChild(btnFiltre);
+        const btnFilter = document.createElement('button');
+        btnFilter.setAttribute('aria-selected', 'false');
+        btnFilter.className = 'btn-filter';
+        btnFilter.dataset.category = category.id;
+        btnFilter.textContent = category.name;
+        btnsContainer.appendChild(btnFilter);
     })
 }
 
@@ -38,6 +38,7 @@ function createWorks(works) {
     gallery.innerHTML = "";
     works.forEach(work => {
         const figure = document.createElement('figure');
+        figure.classList.add('figureFilter', `category-${work.categoryId}`);
         const img = document.createElement('img');
         img.src = work.imageUrl;
         img.alt = work.title;
@@ -50,26 +51,36 @@ function createWorks(works) {
 }
 
 // Fonction pour filtrer les works
-function filtreWorks(works, button) {
-    if (button.dataset.category !== "all"){
-        const categoryidparser = Number(button.dataset.category);
-        const idWorkFilter = works.filter(work => work.categoryId === categoryidparser); // filtrer selon l'id de categories
-        createWorks(idWorkFilter);
-    } 
-    else {
-        createWorks(works); 
-    }    
-
-}
+function filtreWorks(figureData, button) {
+    figureData.forEach(figure => {
+        figure.style.transition = 'opacity 0.5s';
+        if (figure.classList.contains(`category-${button.dataset.category}`) || (button.dataset.category === "all")){           
+            figure.style.opacity = '0';
+            setTimeout(() => {
+                figure.style.display = "block";
+                setTimeout(() => {
+                    figure.style.opacity = '1';
+                }, 200);
+            }, 100);            
+        } 
+        else {
+            figure.style.opacity = '0';
+            setTimeout(() => {
+                figure.style.display = "none";
+            }, 100);          
+        }
+    }) 
+}  
 
 // Fonction pour activation du bouton et filtre selon bouton
-function filtreBtns(works) {
+function filtreBtns() {
     const buttons = document.querySelectorAll('.btn-filter');
+    const figureData = document.querySelectorAll('.figureFilter');
     buttons.forEach(button => {
         button.addEventListener('click', () => {
             buttons.forEach(btn => btn.setAttribute('aria-selected', 'false')); // modifier aria-active "false" sur tous les boutons                      
             button.setAttribute('aria-selected', 'true'); // modifier aria-active "true" sur le bouton actif
-            filtreWorks(works, button);
+            filtreWorks(figureData, button);
         })
     })
 }
@@ -81,7 +92,7 @@ async function init() {
     const categories = dataLoaded.categories;
     createBtns(categories);
     createWorks(works);
-    filtreBtns(works);   
+    filtreBtns();   
     console.log("Works:", works);
     console.log("Categories:", categories);
 }
