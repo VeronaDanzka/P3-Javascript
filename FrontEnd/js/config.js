@@ -1,2 +1,2 @@
-export const worksApi = "http://localhost:5678/api/works";
-export const categoriesApi = "http://localhost:5678/api/categories";
+export const apiGet = ["works", "categories"]
+export const apiUrl = "http://localhost:5678/api/";

@@ -1,4 +1,4 @@
-import { worksApi, categoriesApi } from './config.js';
+import { apiUrl, apiGet } from './config.js';
 
 // fonction chargement data api
 async function loadApi(api){
@@ -7,10 +7,16 @@ async function loadApi(api){
     return data
 }
 
-// Fonction pour charger works et categories en parallèle
+// Fonction pour charger works, categories et de futurs elements en parallèle
 async function loadData() {
-    const [works, categories] = await Promise.all([loadApi(worksApi), loadApi(categoriesApi)]);
-    return { works, categories };
+    const promises = apiGet.map(get => loadApi(`${apiUrl}${get}`));
+    const results = await Promise.all(promises);
+    const data = apiGet.reduce((acc, get, value) => {
+        acc[get] = results[value];
+        return acc;
+    }, {});
+
+    return data;
 }
 
 // Fonction pour ajouter les boutons categories
@@ -86,7 +92,7 @@ function filtreBtns() {
 }
 
 // Lancer la fonction au démarrage de la page
-async function init() {
+export async function init() {
     const dataLoaded = await loadData();
     const works = dataLoaded.works;
     const categories = dataLoaded.categories;
@@ -96,5 +102,3 @@ async function init() {
     console.log("Works:", works);
     console.log("Categories:", categories);
 }
-
-init();
