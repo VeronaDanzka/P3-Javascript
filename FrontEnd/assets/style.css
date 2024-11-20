@@ -302,4 +302,33 @@ footer {
 footer nav li {
 	font-size: 14px;
 }
+.logo-txt {
+	text-decoration: none;
+}
+.border-edit{
+	text-align: center;
+	line-height: 4;
+	background-color:black;
+	color:white;
+	height: 59px;
+	width:100%;
+}
+.fa-pen-to-square{
+	color:white;
+	margin-right: 10px;
+}
+.edit-only {
+    display: none;
+}
+body.edit-mode .edit-only {
+    display: block; /* Affiche les éléments uniquement en mode édition */
+}
+.error-login{
+	color:red;
+	display:none;
+}
+.error-http{
+	color:red;
+	display:none;
+}
 
