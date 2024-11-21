@@ -127,7 +127,7 @@ li:hover {
 }
 #portfolio h2 {
 	text-align: center;
-	margin-bottom: 1em;
+	/* margin-bottom: 1em; */
 }
 .gallery {
 	width: 100%;
@@ -313,7 +313,7 @@ footer nav li {
 	height: 59px;
 	width:100%;
 }
-.fa-pen-to-square{
+.border-edit .fa-pen-to-square{
 	color:white;
 	margin-right: 10px;
 }
@@ -330,5 +330,17 @@ body.edit-mode .edit-only {
 .error-http{
 	color:red;
 	display:none;
+}
+.projects-title{
+	display: flex;
+    justify-content: center;
+}
+.projects-title i {
+	margin-left: 30px;
+	margin-right: 10px;
+	line-height: 2;
+}
+.projects-title span {
+	line-height: 2.2;
 }
 

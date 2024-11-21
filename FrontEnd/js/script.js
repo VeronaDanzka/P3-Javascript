@@ -125,15 +125,20 @@ function logout() {
 }
 // Lancer la fonction au démarrage de la page
 export async function init() {
-    if (localStorage.getItem("authToken")) {
+    if (localStorage.getItem('authToken')) {
         const body = document.querySelector('body');
         const token = localStorage.getItem("authToken");
         const loginLink = document.querySelector('#login');
-        loginLink.textContent = "logout";
+        const projectsTitle = document.querySelector('.projects-title');
+        const btnsContainer = document.querySelector('.btns-container')
+        loginLink.textContent = 'logout';
         loginLink.href = "./index.html";
-        body.classList.toggle("edit-mode");
+        btnsContainer.style.display = "none";
+        body.classList.toggle('edit-mode');
+        projectsTitle.style.marginLeft = '105px';
+        projectsTitle.style.marginBottom = '80px';
         loginLink.addEventListener('click', () => {
-            localStorage.removeItem("authToken");
+            logout();
         })
         console.log("Token trouvé :", token);
     } else {
