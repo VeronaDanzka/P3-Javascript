@@ -1,5 +1,6 @@
 import { apiUrl, apiGet } from './config.js';
 
+// Fonction erreur affichage api
 function errorApi() {
     const gallery = document.querySelector('.gallery');
     gallery.innerHTML = "";
@@ -117,8 +118,27 @@ function filtreBtns() {
     });
 }
 
+function logout() {
+    if (localStorage.getItem("authToken")) {
+        localStorage.removeItem("authToken");
+    }
+}
 // Lancer la fonction au démarrage de la page
 export async function init() {
+    if (localStorage.getItem("authToken")) {
+        const body = document.querySelector('body');
+        const token = localStorage.getItem("authToken");
+        const loginLink = document.querySelector('#login');
+        loginLink.textContent = "logout";
+        loginLink.href = "./index.html";
+        body.classList.toggle("edit-mode");
+        loginLink.addEventListener('click', () => {
+            localStorage.removeItem("authToken");
+        })
+        console.log("Token trouvé :", token);
+    } else {
+        console.log("Aucun token trouvé.");
+    }
     const dataLoaded = await loadData();
     // Vérifiez que les données sont valides avant de créer les boutons et les works
     if (dataLoaded.works && dataLoaded.categories) {

@@ -36,7 +36,9 @@ function submitLogin() {
             const postJson = JSON.stringify(postObject)
             try {
                 const response = await loginPostApi(`${apiUrl}${apiPost[0]}`, postJson);
-                console.log("Réponse de l'API :", response);
+                localStorage.setItem("authToken", response.token); // Enregistre le token
+                console.log(response.token)
+                window.location.href = "../index.html"; // Redirige vers la page d'accueil
             } catch (error) {
                 const errorMessages = document.querySelectorAll(".error-http")
                 const errorMessage = document.querySelector(".error-login")
