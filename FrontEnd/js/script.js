@@ -1,4 +1,4 @@
-import { apiUrl, apiGet } from './config.js';
+import { apiUrl, apiGet, apiPost, apiDelete } from './config.js';
 
 // Fonction erreur affichage api
 function errorApi() {
@@ -139,14 +139,101 @@ function closeModal(){
 
 }
 
-// fonction pour ouvrir la modale 
-function openModal(works){
+// fonction pour l'api fetch delete
+async function deleteWorkApi(api, apiDelete, workId){
+    try {
+        const token = localStorage.getItem('authToken');
+        const dataResponse = await fetch(`${api}${apiDelete[0]}/${workId}`, {
+            method: "delete",
+            headers: {
+                'accept': '*/*',
+                'authorization': `Bearer ${token}`
+            }
+        });
+        if (dataResponse.status === 404) {
+            throw new Error(`Erreur user not found, ${dataResponse.status}: ${dataResponse.statusText}`);
+        }
+        else if (dataResponse.status === 500) {
+            throw new Error(`Erreur unexpected behavior, ${dataResponse.status}: ${dataResponse.statusText}`);
+        }
+        else if (dataResponse.ok){
+            const updatedWorks = await loadData();
+            console.log("function deleteWorkApi", updatedWorks)
+            return {updatedWorks};            
+        }
+    } catch (error) {
+        throw error;
+        
+    }
+}
+
+// fonction pour supprimer des works 
+function deleteWork(works){
+    const figures = document.querySelectorAll('.modal-works figure')
+    figures.forEach(figure => {
+        const btnsDelete = figure.querySelector('.modal-works button');
+        btnsDelete.addEventListener('click', async () => {
+            btnsDelete.style.display = "none";
+            const deleteConfirmationContainer = document.createElement('div');
+            const deleteYes = document.createElement('i')
+            const deleteNo = document.createElement('i')
+            deleteYes.className = "fa-solid fa-square-check";
+            deleteNo.className = "fa-solid fa-square-xmark";
+            deleteConfirmationContainer.className = "delete-confirmation";
+            deleteConfirmationContainer.appendChild(deleteYes);
+            deleteConfirmationContainer.appendChild(deleteNo);
+            figure.appendChild(deleteConfirmationContainer);
+            deleteYes.addEventListener('click', async () => {
+                works.map( async work => {
+                    if(`work-${work.id}` === btnsDelete.id){
+                        try{
+                            console.log(work.id)
+                            const displayWorks = document.querySelector('.display-works');
+                            const errorMessage = displayWorks.querySelectorAll('.error-http');
+                            errorMessage.forEach(message => {
+                                const computedStyle = window.getComputedStyle(message);
+                                if (computedStyle.display === "block"){
+                                    message.style.display = "none";
+                                }
+                            })
+                            const resultDelete = await deleteWorkApi(apiUrl, apiDelete, work.id)
+                            const newWorks = resultDelete.updatedWorks;
+                            console.log(resultDelete);
+                            console.log(resultDelete.updatedWorks);
+                            console.log(newWorks.works);
+                            loadModal(newWorks.works);
+                            createWorks(newWorks.works);
+                        }catch(error){
+                            console.log(error)
+                            const displayWorks = document.querySelector('.display-works');
+                            const errorMessage = displayWorks.querySelectorAll('.error-http');
+                            errorMessage.forEach(message => {
+                                const computedStyle = window.getComputedStyle(message);
+                                if (computedStyle.display === "none"){
+                                    message.style.display = "block";
+                                }
+                            })
+                        }
+                    }   
+                })
+            })
+            deleteNo.addEventListener('click', () => {
+                btnsDelete.style.display = "flex";
+                figure.removeChild(deleteConfirmationContainer);
+            })          
+        })
+    })
+}
+
+// fonction pour ouvrir et charger la modale 
+function loadModal(works){
     const modalContainer = document.querySelector('.modal-container');
     const displayWorks = document.querySelector('.display-works');
     const modalWorks = document.querySelector('.modal-works');
     const body = document.querySelector('body');
     const iconeClose = document.querySelector('.fa-xmark')
     body.style.overflow = "hidden";
+    modalWorks.innerHTML = "";
     works.forEach(work => {
         const figure = document.createElement('figure');
         const button = document.createElement('button');
@@ -161,6 +248,7 @@ function openModal(works){
         figure.appendChild(button);
         modalWorks.appendChild(figure);
     })
+    deleteWork(works);
     modalWorks.style.display = "grid";
     modalContainer.style.display = "flex";
     displayWorks.style.display = "flex";
@@ -196,7 +284,7 @@ export async function init() {
         modalListeners.forEach(listener => {
             listener.addEventListener('click', () => {
                 if (dataLoaded.works && dataLoaded.categories) {
-                    openModal(dataLoaded.works);
+                    loadModal(dataLoaded.works);
                 } else {
                     errorModal();
                 }
