@@ -15,7 +15,7 @@
 	<script type="module" src="./js/main.js"></script>
 </head>
 <body>
-<div class="border-edit edit-only"><i class="fa-regular fa-pen-to-square"></i></i><span>mode édition</span></div>
+<div class="border-edit edit-only" aria-hidden="true"><i class="fa-regular fa-pen-to-square"></i></i><span>mode édition</span></div>
 <div class="main-container">
 <header>
 	<h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
@@ -41,53 +41,9 @@
 		</article>
 	</section>
 	<section id="portfolio">
-		<div class="projects-title"><h2>Mes Projets</h2><i class="fa-regular fa-pen-to-square edit-only"></i></i><span class="edit-only">modifier</span></div>
+		<div class="projects-title"><h2>Mes Projets</h2><i class="fa-regular fa-pen-to-square edit-only open-modal" aria-hidden="true"></i><span class="edit-only open-modal" aria-hidden="true">modifier</span></div>
 		<div class="btns-container"></div>
 		<div class="gallery">
-			<!-- <figure>
-				<img src="assets/images/abajour-tahina.png" alt="Abajour Tahina">
-				<figcaption>Abajour Tahina</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/appartement-paris-v.png" alt="Appartement Paris V">
-				<figcaption>Appartement Paris V</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/restaurant-sushisen-londres.png" alt="Restaurant Sushisen - Londres">
-				<figcaption>Restaurant Sushisen - Londres</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/la-balisiere.png" alt="Villa “La Balisiere” - Port Louis">
-				<figcaption>Villa “La Balisiere” - Port Louis</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/structures-thermopolis.png" alt="Structures Thermopolis">
-				<figcaption>Structures Thermopolis</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/appartement-paris-x.png" alt="Appartement Paris X">
-				<figcaption>Appartement Paris X</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/le-coteau-cassis.png" alt="Pavillon “Le coteau” - Cassis">
-				<figcaption>Pavillon “Le coteau” - Cassis</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/villa-ferneze.png" alt="Villa Ferneze - Isola d’Elba">
-				<figcaption>Villa Ferneze - Isola d’Elba</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/appartement-paris-xviii.png" alt="Appartement Paris XVIII">
-				<figcaption>Appartement Paris XVIII</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/bar-lullaby-paris.png" alt="Bar “Lullaby” - Paris">
-				<figcaption>Bar “Lullaby” - Paris</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/hotel-first-arte-new-delhi.png" alt="Hotel First Arte - New Delhi">
-				<figcaption>Hotel First Arte - New Delhi</figcaption>
-			</figure> -->
 		</div>
 	</section>
 	<section id="contact">
@@ -104,6 +60,20 @@
 		</form>
 	</section>
 </main>
+<aside class="modal-container" aria-hidden="true">
+	<div class="modal">
+		<div class="display-works">
+			<i class="fa-solid fa-xmark"></i>
+			<h2 class="modal-title">Galerie photo</h2>
+			<div class="modal-works"></div>
+			<button class="modal-btn" id="add-work">Ajouter une photo</button>
+		</div>
+		<div class="display-add">
+			<h2 class="modal-title"></h2>
+			<div class="modal-add"></div>
+		</div>
+	</div>
+</aside>
 </div>
 <footer>
 	<nav>

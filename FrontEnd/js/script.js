@@ -118,19 +118,72 @@ function filtreBtns() {
     });
 }
 
+// fonction pour se déconnecter
 function logout() {
     if (localStorage.getItem("authToken")) {
         localStorage.removeItem("authToken");
     }
 }
+
+// fonction pour fermer la modale 
+function closeModal(){
+    const body = document.querySelector('body');
+    const modalContainer = document.querySelector('.modal-container');
+    const displayWorks = document.querySelector('.display-works');
+    const modalWorks = document.querySelector('.modal-works');
+    modalWorks.style.display = "none";
+    modalContainer.style.display = "none";
+    displayWorks.style.display = "none";
+    body.style.overflow = "auto";
+    modalWorks.innerHTML = "";
+
+}
+
+// fonction pour ouvrir la modale 
+function openModal(works){
+    const modalContainer = document.querySelector('.modal-container');
+    const displayWorks = document.querySelector('.display-works');
+    const modalWorks = document.querySelector('.modal-works');
+    const body = document.querySelector('body');
+    const iconeClose = document.querySelector('.fa-xmark')
+    body.style.overflow = "hidden";
+    works.forEach(work => {
+        const figure = document.createElement('figure');
+        const button = document.createElement('button');
+        const deleteWork = document.createElement('i');
+        const img = document.createElement('img');
+        img.src = work.imageUrl;
+        img.alt = work.title;
+        button.id = `work-${work.id}`;
+        deleteWork.className = "fa-solid fa-trash-can";
+        button.appendChild(deleteWork);
+        figure.appendChild(img);
+        figure.appendChild(button);
+        modalWorks.appendChild(figure);
+    })
+    modalWorks.style.display = "grid";
+    modalContainer.style.display = "flex";
+    displayWorks.style.display = "flex";
+    iconeClose.addEventListener('click', () => {
+        closeModal();  
+    });
+    modalContainer.addEventListener('click', (event) => {
+        if (event.target === event.currentTarget){
+            closeModal();
+        };          
+    });
+}
+
 // Lancer la fonction au démarrage de la page
 export async function init() {
+    const dataLoaded = await loadData();
     if (localStorage.getItem('authToken')) {
         const body = document.querySelector('body');
         const token = localStorage.getItem("authToken");
         const loginLink = document.querySelector('#login');
         const projectsTitle = document.querySelector('.projects-title');
-        const btnsContainer = document.querySelector('.btns-container')
+        const btnsContainer = document.querySelector('.btns-container');
+        const modalListeners = document.querySelectorAll('.open-modal');
         loginLink.textContent = 'logout';
         loginLink.href = "./index.html";
         btnsContainer.style.display = "none";
@@ -139,12 +192,20 @@ export async function init() {
         projectsTitle.style.marginBottom = '80px';
         loginLink.addEventListener('click', () => {
             logout();
-        })
+        });
+        modalListeners.forEach(listener => {
+            listener.addEventListener('click', () => {
+                if (dataLoaded.works && dataLoaded.categories) {
+                    openModal(dataLoaded.works);
+                } else {
+                    errorModal();
+                }
+            })
+        });
         console.log("Token trouvé :", token);
     } else {
         console.log("Aucun token trouvé.");
     }
-    const dataLoaded = await loadData();
     // Vérifiez que les données sont valides avant de créer les boutons et les works
     if (dataLoaded.works && dataLoaded.categories) {
         createBtns(dataLoaded.categories);
