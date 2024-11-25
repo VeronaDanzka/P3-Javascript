@@ -139,7 +139,7 @@ function closeModal(){
 
 }
 
-// fonction pour l'api fetch delete
+// fonction pour api fetch delete
 async function deleteWorkApi(api, apiDelete, workId){
     try {
         const token = localStorage.getItem('authToken');
@@ -156,11 +156,6 @@ async function deleteWorkApi(api, apiDelete, workId){
         else if (dataResponse.status === 500) {
             throw new Error(`Erreur unexpected behavior, ${dataResponse.status}: ${dataResponse.statusText}`);
         }
-        else if (dataResponse.ok){
-            const updatedWorks = await loadData();
-            console.log("function deleteWorkApi", updatedWorks)
-            return {updatedWorks};            
-        }
     } catch (error) {
         throw error;
         
@@ -168,65 +163,75 @@ async function deleteWorkApi(api, apiDelete, workId){
 }
 
 // fonction pour supprimer des works 
-function deleteWork(works){
-    const figures = document.querySelectorAll('.modal-works figure')
+async function deleteWork(works) {
+    let newWorks = works;
+    const figures = document.querySelectorAll('.modal-works figure');
     figures.forEach(figure => {
         const btnsDelete = figure.querySelector('.modal-works button');
         btnsDelete.addEventListener('click', async () => {
             btnsDelete.style.display = "none";
             const deleteConfirmationContainer = document.createElement('div');
-            const deleteYes = document.createElement('i')
-            const deleteNo = document.createElement('i')
+            const deleteYes = document.createElement('i');
+            const deleteNo = document.createElement('i');
             deleteYes.className = "fa-solid fa-square-check";
             deleteNo.className = "fa-solid fa-square-xmark";
             deleteConfirmationContainer.className = "delete-confirmation";
             deleteConfirmationContainer.appendChild(deleteYes);
             deleteConfirmationContainer.appendChild(deleteNo);
             figure.appendChild(deleteConfirmationContainer);
+
             deleteYes.addEventListener('click', async () => {
-                works.map( async work => {
-                    if(`work-${work.id}` === btnsDelete.id){
-                        try{
-                            console.log(work.id)
+                for (const work of works) {
+                    if (`work-${work.id}` === btnsDelete.id) {
+                        try {
+                            console.log(work.id);
                             const displayWorks = document.querySelector('.display-works');
                             const errorMessage = displayWorks.querySelectorAll('.error-http');
                             errorMessage.forEach(message => {
                                 const computedStyle = window.getComputedStyle(message);
-                                if (computedStyle.display === "block"){
+                                if (computedStyle.display === "block") {
                                     message.style.display = "none";
                                 }
-                            })
-                            const resultDelete = await deleteWorkApi(apiUrl, apiDelete, work.id)
-                            const newWorks = resultDelete.updatedWorks;
-                            console.log(resultDelete);
-                            console.log(resultDelete.updatedWorks);
-                            console.log(newWorks.works);
-                            loadModal(newWorks.works);
-                            createWorks(newWorks.works);
-                        }catch(error){
-                            console.log(error)
+                            });
+
+                            // Appel API pour supprimer works
+                            await deleteWorkApi(apiUrl, apiDelete, work.id);
+
+                            // mise à jour des works modale
+                            loadModal();
+                            
+                            // mise à jour des works background
+                            newWorks = works.filter(work => `work-${work.id}` !== btnsDelete.id);
+                            createWorks(newWorks);
+                            console.log("new works:",newWorks)
+
+                        } catch (error) {
+                            console.log(error);
                             const displayWorks = document.querySelector('.display-works');
                             const errorMessage = displayWorks.querySelectorAll('.error-http');
                             errorMessage.forEach(message => {
                                 const computedStyle = window.getComputedStyle(message);
-                                if (computedStyle.display === "none"){
+                                if (computedStyle.display === "none") {
                                     message.style.display = "block";
                                 }
-                            })
+                            });
                         }
-                    }   
-                })
-            })
+                    }
+                }
+            });
             deleteNo.addEventListener('click', () => {
                 btnsDelete.style.display = "flex";
                 figure.removeChild(deleteConfirmationContainer);
-            })          
-        })
-    })
+            });
+        });
+    });
 }
 
+
 // fonction pour ouvrir et charger la modale 
-function loadModal(works){
+async function loadModal(){
+    const dataLoaded = await loadData();
+    const works = dataLoaded.works
     const modalContainer = document.querySelector('.modal-container');
     const displayWorks = document.querySelector('.display-works');
     const modalWorks = document.querySelector('.modal-works');
@@ -253,7 +258,7 @@ function loadModal(works){
     modalContainer.style.display = "flex";
     displayWorks.style.display = "flex";
     iconeClose.addEventListener('click', () => {
-        closeModal();  
+        closeModal(); 
     });
     modalContainer.addEventListener('click', (event) => {
         if (event.target === event.currentTarget){
@@ -282,9 +287,9 @@ export async function init() {
             logout();
         });
         modalListeners.forEach(listener => {
-            listener.addEventListener('click', () => {
+            listener.addEventListener('click', () => {                
                 if (dataLoaded.works && dataLoaded.categories) {
-                    loadModal(dataLoaded.works);
+                    loadModal();
                 } else {
                     errorModal();
                 }
