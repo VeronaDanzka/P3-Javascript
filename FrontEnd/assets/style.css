@@ -331,6 +331,12 @@ body.edit-mode .edit-only {
 	color:red;
 	display:none;
 }
+.login-form.error-server .error-http{
+	display:block;	
+}
+.login-form.error .error-login{
+	display:block;	
+}
 .projects-title{
 	display: flex;
     justify-content: center;

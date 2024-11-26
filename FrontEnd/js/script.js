@@ -1,4 +1,5 @@
 import { apiUrl, apiGet, apiPost, apiDelete } from './config.js';
+import { getCookie } from './login.js'
 
 // Fonction erreur affichage api
 function errorApi() {
@@ -119,9 +120,9 @@ function filtreBtns() {
 }
 
 // fonction pour se déconnecter
-function logout() {
-    if (localStorage.getItem("authToken")) {
-        localStorage.removeItem("authToken");
+function logout(name) {
+    if (getCookie(name)) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     }
 }
 
@@ -270,7 +271,7 @@ async function loadModal(){
 // Lancer la fonction au démarrage de la page
 export async function init() {
     const dataLoaded = await loadData();
-    if (localStorage.getItem('authToken')) {
+    if (getCookie('authToken')) {
         const body = document.querySelector('body');
         const token = localStorage.getItem("authToken");
         const loginLink = document.querySelector('#login');
@@ -284,7 +285,7 @@ export async function init() {
         projectsTitle.style.marginLeft = '105px';
         projectsTitle.style.marginBottom = '80px';
         loginLink.addEventListener('click', () => {
-            logout();
+            logout('authToken');
         });
         modalListeners.forEach(listener => {
             listener.addEventListener('click', () => {                
