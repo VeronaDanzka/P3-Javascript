@@ -4,13 +4,9 @@ import { getCookie } from './login.js'
 // Fonction erreur affichage api
 function errorApi() {
     const gallery = document.querySelector('.gallery');
-    gallery.innerHTML = "";
-    const errorMessage = document.createElement('p');
-    errorMessage.textContent = "Une erreur s'est produite, les projets n'ont pas pu être chargés";
-    errorMessage.style.color = "red"
-    gallery.style.display = "flex"
-    gallery.style.justifyContent = "center"
-    gallery.appendChild(errorMessage);
+    if (gallery){
+        gallery.classList.add('error');
+    }
 }
 
 // Fonction chargement data api
@@ -55,51 +51,62 @@ function createBtns(categories) {
     btnFilterAll.className = 'btn-filter';
     btnFilterAll.dataset.category = 'all';
     btnFilterAll.textContent = 'Tous';
-    btnsContainer.appendChild(btnFilterAll);
-    categories.forEach(category => {
-        const btnFilter = document.createElement('button');
-        btnFilter.setAttribute('aria-selected', 'false');
-        btnFilter.className = 'btn-filter';
-        btnFilter.dataset.category = category.id;
-        btnFilter.textContent = category.name;
-        btnsContainer.appendChild(btnFilter);
-    });
+    if(btnsContainer){
+        btnsContainer.appendChild(btnFilterAll);
+        categories.forEach(category => {
+            const btnFilter = document.createElement('button');
+            btnFilter.setAttribute('aria-selected', 'false');
+            btnFilter.className = 'btn-filter';
+            btnFilter.dataset.category = category.id;
+            btnFilter.textContent = category.name;
+            btnsContainer.appendChild(btnFilter);
+        });
+    }
 }
 
 // Fonction pour ajouter les works
 function createWorks(works) {
     const gallery = document.querySelector('.gallery');
-    gallery.innerHTML = "";
-    works.forEach(work => {
-        const figure = document.createElement('figure');
-        figure.classList.add('figureFilter', `category-${work.categoryId}`);
-        const img = document.createElement('img');
-        img.src = work.imageUrl;
-        img.alt = work.title;
-        const figcaption = document.createElement('figcaption');
-        figcaption.textContent = work.title;
-        figure.appendChild(img);
-        figure.appendChild(figcaption);
-        gallery.appendChild(figure);
-    });
+    if(gallery){
+        gallery.innerHTML = "";
+        works.forEach(work => {
+            const figure = document.createElement('figure');
+            figure.classList.add('figureFilter', `category-${work.categoryId}`);
+            const img = document.createElement('img');
+            img.src = work.imageUrl;
+            img.alt = work.title;
+            const figcaption = document.createElement('figcaption');
+            figcaption.textContent = work.title;
+            figure.appendChild(img);
+            figure.appendChild(figcaption);
+            gallery.appendChild(figure);
+        });
+    }
 }
 
 // Fonction pour filtrer les works
-function filtreWorks(figureData, button) {
-    figureData.forEach(figure => {
-        figure.style.transition = 'opacity 0.5s';
+function filtreWorks(figures, button) {
+    figures.forEach(figure => {
         if (figure.classList.contains(`category-${button.dataset.category}`) || (button.dataset.category === "all")) {
-            figure.style.opacity = '0';
             setTimeout(() => {
-                figure.style.display = "block";
+                if (figure.classList.contains('hidden')){
+                    figure.classList.remove('hidden');
+                    figure.classList.add('block');
+                }                
                 setTimeout(() => {
-                    figure.style.opacity = '1';
+                    if (figure.classList.contains('invisible')){
+                        figure.classList.remove('invisible');
+                        figure.classList.add('visible');
+                    }                       
                 }, 200);
             }, 100);
         } else {
-            figure.style.opacity = '0';
             setTimeout(() => {
-                figure.style.display = "none";
+                figure.classList.remove('visible');
+                figure.classList.add('invisible');
+                setTimeout(() => {
+                    figure.classList.add('hidden');
+                }, 200);
             }, 100);
         }
     });
@@ -109,14 +116,17 @@ function filtreWorks(figureData, button) {
 function filtreBtns() {
     const buttons = document.querySelectorAll('.btn-filter');
     const figureData = document.querySelectorAll('.figureFilter');
-
-    buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            buttons.forEach(btn => btn.setAttribute('aria-selected', 'false')); // Désactiver tous les boutons
-            button.setAttribute('aria-selected', 'true'); // Activer le bouton cliqué
-            filtreWorks(figureData, button);
+    if(buttons){
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                buttons.forEach(btn => btn.setAttribute('aria-selected', 'false')); // Désactiver tous les boutons
+                button.setAttribute('aria-selected', 'true'); // Activer le bouton cliqué
+                if(figureData){
+                    filtreWorks(figureData, button);
+                }
+            });
         });
-    });
+    }
 }
 
 // fonction pour se déconnecter
@@ -126,19 +136,7 @@ function logout(name) {
     }
 }
 
-// fonction pour fermer la modale 
-function closeModal(){
-    const body = document.querySelector('body');
-    const modalContainer = document.querySelector('.modal-container');
-    const displayWorks = document.querySelector('.display-works');
-    const modalWorks = document.querySelector('.modal-works');
-    modalWorks.style.display = "none";
-    modalContainer.style.display = "none";
-    displayWorks.style.display = "none";
-    body.style.overflow = "auto";
-    modalWorks.innerHTML = "";
 
-}
 
 // fonction pour api fetch delete
 async function deleteWorkApi(api, apiDelete, workId){
@@ -165,107 +163,205 @@ async function deleteWorkApi(api, apiDelete, workId){
 
 // fonction pour supprimer des works 
 async function deleteWork(works) {
-    let newWorks = works;
     const figures = document.querySelectorAll('.modal-works figure');
-    figures.forEach(figure => {
-        const btnsDelete = figure.querySelector('.modal-works button');
-        btnsDelete.addEventListener('click', async () => {
-            btnsDelete.style.display = "none";
-            const deleteConfirmationContainer = document.createElement('div');
-            const deleteYes = document.createElement('i');
-            const deleteNo = document.createElement('i');
-            deleteYes.className = "fa-solid fa-square-check";
-            deleteNo.className = "fa-solid fa-square-xmark";
-            deleteConfirmationContainer.className = "delete-confirmation";
-            deleteConfirmationContainer.appendChild(deleteYes);
-            deleteConfirmationContainer.appendChild(deleteNo);
-            figure.appendChild(deleteConfirmationContainer);
+    if(figures){
+        figures.forEach(figure => {
+            const btnsDelete = figure.querySelector('.modal-works button');
+            if(btnsDelete){
+                // Demande de confirmation de suppression
+                btnsDelete.addEventListener('click', async () => {
+                    btnsDelete.classList.add('hidden');
+                    const deleteConfirmationContainer = document.createElement('div');
+                    const deleteYes = document.createElement('i');
+                    const deleteNo = document.createElement('i');
+                    deleteYes.className = "fa-solid fa-square-check";
+                    deleteNo.className = "fa-solid fa-square-xmark";
+                    deleteConfirmationContainer.className = "delete-confirmation";
+                    deleteConfirmationContainer.appendChild(deleteYes);
+                    deleteConfirmationContainer.appendChild(deleteNo);
+                    figure.appendChild(deleteConfirmationContainer);
+                    // Validation de suppression par l'utilisateur
+                    deleteYes.addEventListener('click', async () => {
+                        for (const work of works) {
+                            if (`work-${work.id}` === btnsDelete.id) {
+                                try {
+                                    console.log(work.id);
+                                    const displayWorks = document.querySelector('.display-works');
+                                    if(displayWorks){
+                                        if(displayWorks.classList.contains('error-server')){
+                                            displayWorks.classList.remove('error-server');             
+                                        };
+                                    }
+                                    // Appel API pour supprimer works
+                                    await deleteWorkApi(apiUrl, apiDelete, work.id);
 
-            deleteYes.addEventListener('click', async () => {
-                for (const work of works) {
-                    if (`work-${work.id}` === btnsDelete.id) {
-                        try {
-                            console.log(work.id);
-                            const displayWorks = document.querySelector('.display-works');
-                            const errorMessage = displayWorks.querySelectorAll('.error-http');
-                            errorMessage.forEach(message => {
-                                const computedStyle = window.getComputedStyle(message);
-                                if (computedStyle.display === "block") {
-                                    message.style.display = "none";
+                                    // mise à jour des works modale
+                                    loadModal();
+                                    
+                                    // mise à jour des works background
+                                    const newWorks = works.filter(work => `work-${work.id}` !== btnsDelete.id);
+                                    createWorks(newWorks);
+                                    console.log("new works:",newWorks)
+
+                                } catch (error) {
+                                    console.log(error);
+                                    
                                 }
-                            });
-
-                            // Appel API pour supprimer works
-                            await deleteWorkApi(apiUrl, apiDelete, work.id);
-
-                            // mise à jour des works modale
-                            loadModal();
-                            
-                            // mise à jour des works background
-                            newWorks = works.filter(work => `work-${work.id}` !== btnsDelete.id);
-                            createWorks(newWorks);
-                            console.log("new works:",newWorks)
-
-                        } catch (error) {
-                            console.log(error);
-                            const displayWorks = document.querySelector('.display-works');
-                            const errorMessage = displayWorks.querySelectorAll('.error-http');
-                            errorMessage.forEach(message => {
-                                const computedStyle = window.getComputedStyle(message);
-                                if (computedStyle.display === "none") {
-                                    message.style.display = "block";
-                                }
-                            });
+                            }
                         }
-                    }
-                }
-            });
-            deleteNo.addEventListener('click', () => {
-                btnsDelete.style.display = "flex";
-                figure.removeChild(deleteConfirmationContainer);
-            });
+                    });
+                    // Suppression refusée par l'utilisateur
+                    deleteNo.addEventListener('click', () => {
+                        btnsDelete.classList.remove('hidden');
+                        figure.removeChild(deleteConfirmationContainer);
+                    });
+                });
+            }
         });
-    });
+    }
 }
 
-
+// fonction pour fermer la modale 
+function closeModal(){
+    const body = document.querySelector('body');
+    const modalContainer = document.querySelector('.modal-container');
+    const modalWorks = document.querySelector('.modal-works');
+    if(modalContainer){
+        modalContainer.classList.add('close');
+    }
+    body.classList.remove('hidden');
+    if(modalWorks){
+        modalWorks.innerHTML = "";
+    }
+}
+function addPhoto(categories){
+    const modal = document.querySelector('.modal')
+    const buttonAddPhoto = document.getElementById('add-work');
+    const displayAdd = document.querySelector('.display-add')
+    const displayWorks = document.querySelector('.display-works')
+    const categorySelect = document.getElementById('categories')
+    let iconeClose = null
+    if(displayAdd){
+        iconeClose = displayAdd.querySelector('.fa-xmark')
+    }
+    if(buttonAddPhoto){
+        buttonAddPhoto.addEventListener('click', () => {
+            if(displayWorks){
+                if(modal){
+                    modal.classList.add('opacity');
+                    displayWorks.classList.add('opacity');
+                    setTimeout(() => {
+                        displayWorks.classList.add('hidden');
+                        modal.classList.remove('opacity');                        
+                    }, 200)
+                }
+            }
+            setTimeout(() => {
+                if(displayAdd){
+                    displayAdd.classList.add('open');
+                }
+            }, 200);
+            setTimeout(() => {
+                if(displayAdd){
+                    displayAdd.classList.add('opacity');
+                }
+            }, 300);
+        })
+    }
+    const firstOption = document.createElement('option')
+    firstOption.value = "";
+    firstOption.disabled = true;
+    firstOption.selected = true;
+    if(categorySelect){
+        categorySelect.appendChild(firstOption);
+        categories.forEach(category => {
+            const option = document.createElement('option')
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+        })
+    }
+    if(iconeClose){
+        iconeClose.addEventListener('click', () => {
+            closeModal(); 
+        });     
+    }
+}
 // fonction pour ouvrir et charger la modale 
 async function loadModal(){
-    const dataLoaded = await loadData();
-    const works = dataLoaded.works
+    try{
+        const dataLoaded = await loadData();    
+        const works = dataLoaded.works
+        const categories = dataLoaded.categories
+        const modalContainer = document.querySelector('.modal-container');
+        const modalWorks = document.querySelector('.modal-works');
+        const body = document.querySelector('body');
+        const iconeClose = document.querySelector('.fa-xmark')
+        body.classList.add('hidden');
+        if(modalWorks){
+            modalWorks.innerHTML = "";
+        }
+        works.forEach(work => {
+            const figure = document.createElement('figure');
+            const button = document.createElement('button');
+            const deleteWork = document.createElement('i');
+            const img = document.createElement('img');
+            img.src = work.imageUrl;
+            img.alt = work.title;
+            button.id = `work-${work.id}`;
+            deleteWork.className = "fa-solid fa-trash-can";
+            button.appendChild(deleteWork);
+            figure.appendChild(img);
+            figure.appendChild(button);
+            modalWorks.appendChild(figure);
+        })
+        deleteWork(works);
+        addPhoto(categories);
+        if(modalContainer){
+            modalContainer.classList.remove('close');
+            modalContainer.addEventListener('click', (event) => {
+                if (event.target === event.currentTarget){
+                    closeModal();
+                };          
+            });
+        }
+        if(iconeClose){
+            iconeClose.addEventListener('click', () => {
+                closeModal(); 
+            });
+        }
+    }catch{
+        errorModal()  
+    }
+}
+
+// Fonction d'ouverture de la modale erreur api
+function errorModal(){
     const modalContainer = document.querySelector('.modal-container');
-    const displayWorks = document.querySelector('.display-works');
     const modalWorks = document.querySelector('.modal-works');
     const body = document.querySelector('body');
     const iconeClose = document.querySelector('.fa-xmark')
-    body.style.overflow = "hidden";
-    modalWorks.innerHTML = "";
-    works.forEach(work => {
-        const figure = document.createElement('figure');
-        const button = document.createElement('button');
-        const deleteWork = document.createElement('i');
-        const img = document.createElement('img');
-        img.src = work.imageUrl;
-        img.alt = work.title;
-        button.id = `work-${work.id}`;
-        deleteWork.className = "fa-solid fa-trash-can";
-        button.appendChild(deleteWork);
-        figure.appendChild(img);
-        figure.appendChild(button);
-        modalWorks.appendChild(figure);
-    })
-    deleteWork(works);
-    modalWorks.style.display = "grid";
-    modalContainer.style.display = "flex";
-    displayWorks.style.display = "flex";
-    iconeClose.addEventListener('click', () => {
-        closeModal(); 
-    });
-    modalContainer.addEventListener('click', (event) => {
-        if (event.target === event.currentTarget){
-            closeModal();
-        };          
-    });
+    const displayWorks = document.querySelector('.display-works');
+    body.classList.add('hidden');
+    if(modalWorks){
+        modalWorks.innerHTML = "";
+    }
+    if(modalContainer){
+        modalContainer.classList.remove('close');
+        modalContainer.addEventListener('click', (event) => {
+            if (event.target === event.currentTarget){
+                closeModal();
+            };          
+        });
+    }
+    if(displayWorks){
+        displayWorks.classList.add('error-server');
+    }
+    if(iconeClose){
+        iconeClose.addEventListener('click', () => {
+            closeModal(); 
+        });
+    }    
 }
 
 // Lancer la fonction au démarrage de la page
@@ -278,24 +374,31 @@ export async function init() {
         const projectsTitle = document.querySelector('.projects-title');
         const btnsContainer = document.querySelector('.btns-container');
         const modalListeners = document.querySelectorAll('.open-modal');
-        loginLink.textContent = 'logout';
-        loginLink.href = "./index.html";
-        btnsContainer.style.display = "none";
+        if(loginLink){
+            loginLink.textContent = 'logout';
+            loginLink.href = "./index.html";
+            loginLink.addEventListener('click', () => {
+                logout('authToken');
+            });
+        }
+        if(btnsContainer){        
+            btnsContainer.classList.toggle('hidden');
+        }
         body.classList.toggle('edit-mode');
-        projectsTitle.style.marginLeft = '105px';
-        projectsTitle.style.marginBottom = '80px';
-        loginLink.addEventListener('click', () => {
-            logout('authToken');
-        });
-        modalListeners.forEach(listener => {
-            listener.addEventListener('click', () => {                
-                if (dataLoaded.works && dataLoaded.categories) {
-                    loadModal();
-                } else {
-                    errorModal();
-                }
-            })
-        });
+        if(projectsTitle){
+            projectsTitle.classList.toggle('edit-mode');
+        }
+        if(modalListeners){
+            modalListeners.forEach(listener => {
+                listener.addEventListener('click', () => {                
+                    if (dataLoaded.works && dataLoaded.categories) {
+                        loadModal();
+                    } else {
+                        errorModal();
+                    }
+                })
+            });
+        }
         console.log("Token trouvé :", token);
     } else {
         console.log("Aucun token trouvé.");

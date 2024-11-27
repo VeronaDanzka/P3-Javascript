@@ -218,6 +218,9 @@ nav img {
 	margin-bottom: 40px;
 	margin-top: 50px;
 }
+.btns-container .hidden{
+	display:none;
+}
 
 .btn-filter {
 	background-color:#FFFEF8;
@@ -341,6 +344,10 @@ body.edit-mode .edit-only {
 	display: flex;
     justify-content: center;
 }
+.projects-title.edit-mode{
+	margin-left: 105px;
+	margin-bottom: 80px;
+}
 .projects-title i {
 	margin-left: 30px;
 	margin-right: 10px;
@@ -351,6 +358,26 @@ body.edit-mode .edit-only {
 	line-height: 2.2;
 	cursor: pointer;
 }
+.gallery.error {
+	display: flex;
+    justify-content: center;
+}
+.gallery.error .error-http{
+	display:block;
+}
+.figureFilter{
+	transition-duration: 0.5s;
+	display: block;
+}
+.figureFilter.visible {
+	opacity: 1;
+}
+.figureFilter.invisible {
+	opacity: 0;
+}
+.figureFilter.hidden {
+	display: none;
+}
 .modal-container {
 	position: fixed;
 	top: 0;
@@ -359,17 +386,56 @@ body.edit-mode .edit-only {
 	height: 100%;
 	z-index: 10000;
 	background-color: #0000004D;
-	display: none;
+	display: flex;
 	justify-content: center;
 	align-items: center;
 }
-.display-works {
+.modal-container.close{
 	display: none;
+}
+body.hidden {
+	overflow: hidden;
+}
+.display-works {
+	display: flex;
 	flex-direction: column;
 	align-items: center;
 }
+.display-works.opacity {
+	transform: translateX(+20%);
+	opacity: 0;
+	transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+.display-works.opacity.hidden {
+	display:none;
+}
+.modal-works button{
+	display: flex;
+}
+.modal-works button.hidden{
+	display: none;
+}
+.display-works.error-server .error-http{
+	display:block;
+	text-align: center;
+    margin-top: 10px;	
+}
 .display-add {
 	display: none;
+	
+}
+.display-add.open {
+	display:flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	transform: translateX(-20%);
+	opacity: 0;
+	transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+.display-add.open.opacity{
+	transform: translateX(0);
+	opacity: 1;
 }
 .modal {
 	width: 38%;
@@ -380,10 +446,17 @@ body.edit-mode .edit-only {
 	max-height: 90vh;
     overflow: auto;
 }
+.modal.opacity {
+	overflow:hidden;
+}
+.xmark-container {
+	display:flex;
+	justify-content: flex-end;
+	width: 100%;
+    margin-bottom: 20px;
+}
 .fa-xmark {
 	font-size: 24px;
-	text-align: end;
-	width: 100%;
 	margin-bottom: 20px;
 	cursor: pointer;
 }
