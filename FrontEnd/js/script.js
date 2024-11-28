@@ -234,59 +234,194 @@ function closeModal(){
         modalWorks.innerHTML = "";
     }
 }
-function addPhoto(categories){
-    const modal = document.querySelector('.modal')
-    const buttonAddPhoto = document.getElementById('add-work');
-    const displayAdd = document.querySelector('.display-add')
-    const displayWorks = document.querySelector('.display-works')
-    const categorySelect = document.getElementById('categories')
-    let iconeClose = null
+
+//fonction pour retourner en arrière dans la modale
+function returnModal(modal, displayAdd, displayWorks){
     if(displayAdd){
-        iconeClose = displayAdd.querySelector('.fa-xmark')
+        if(modal){
+            modal.classList.add('overflow');
+            displayAdd.classList.remove('visible');
+            setTimeout(() => {
+                displayAdd.classList.remove('open');
+                modal.classList.add('overflow');                        
+            }, 200)
+        }
     }
-    if(buttonAddPhoto){
+    setTimeout(() => {
+        if(displayWorks){
+            displayWorks.classList.remove('hidden');
+        }
+    }, 200);
+    setTimeout(() => {
+        if(displayWorks){
+            displayWorks.classList.remove('opacity');
+        }
+    }, 300);
+}
+
+// fonction pour l'ajout photo de la modale
+function addPhoto(categories) {
+    const modal = document.querySelector('.modal');
+    const buttonAddPhoto = document.getElementById('add-work');
+    const displayAdd = document.querySelector('.display-add');
+    const displayWorks = document.querySelector('.display-works');
+    const categorySelect = document.getElementById('categories');
+    const buttonValidatePhoto = document.querySelector('.add-photo-btn');
+    const form = document.getElementById('image-upload-form');
+    const formTitle = document.getElementById('title');
+    const formCategories = document.getElementById('categories');
+    const formImage = document.getElementById('image');
+    const errorForm = document.querySelector('.error-form');
+    const uploadButton = document.getElementById('upload-button');
+    const errorImg = document.querySelector('.error-img');
+    const returnIcone = document.querySelector('.fa-arrow-left');
+    const closeIcone = displayAdd.querySelector('.fa-xmark');
+    const imagePreview = document.getElementById('image-preview');
+
+
+    setupModal(buttonAddPhoto, modal, displayWorks, displayAdd);
+    createCategories(categorySelect, categories);
+    setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview);
+    setupUploadButton(uploadButton, formImage, errorImg);    
+    if(returnIcone){
+        returnIcone.addEventListener('click', () =>{
+            returnModal(modal, displayAdd, displayWorks);
+        })
+    }
+    if(closeIcone){
+        closeIcone.addEventListener('click', () =>{
+            closeModal();
+        })
+    }
+}
+
+// fonction pour affichage steps de la modale
+function setupModal(buttonAddPhoto, modal, displayWorks, displayAdd) {
+    if (buttonAddPhoto) {
         buttonAddPhoto.addEventListener('click', () => {
-            if(displayWorks){
-                if(modal){
-                    modal.classList.add('opacity');
+            if (displayWorks) {
+                if (modal) {
+                    modal.classList.add('overflow');
                     displayWorks.classList.add('opacity');
                     setTimeout(() => {
                         displayWorks.classList.add('hidden');
-                        modal.classList.remove('opacity');                        
-                    }, 200)
+                        modal.classList.remove('overflow');
+                    }, 200);
                 }
             }
             setTimeout(() => {
-                if(displayAdd){
+                if (displayAdd) {
                     displayAdd.classList.add('open');
                 }
             }, 200);
             setTimeout(() => {
-                if(displayAdd){
-                    displayAdd.classList.add('opacity');
+                if (displayAdd) {
+                    displayAdd.classList.add('visible');
                 }
             }, 300);
-        })
+        });
     }
-    const firstOption = document.createElement('option')
-    firstOption.value = "";
-    firstOption.disabled = true;
-    firstOption.selected = true;
-    if(categorySelect){
+}
+
+// fonction pour créer les options de catégories dans select
+function createCategories(categorySelect, categories) {
+    if (categorySelect) {
+        const firstOption = document.createElement('option');
+        firstOption.value = "";
+        firstOption.disabled = true;
+        firstOption.selected = true;
+
+        categorySelect.innerHTML = "";
         categorySelect.appendChild(firstOption);
+
         categories.forEach(category => {
-            const option = document.createElement('option')
+            const option = document.createElement('option');
             option.value = category.id;
             option.textContent = category.name;
             categorySelect.appendChild(option);
-        })
-    }
-    if(iconeClose){
-        iconeClose.addEventListener('click', () => {
-            closeModal(); 
-        });     
+        });
     }
 }
+
+// fonction pour image preview 
+function imgPreview(file, imagePreview){
+    const imageUrl = URL.createObjectURL(file);
+    const previewContainer = document.getElementById('preview-container');
+    const imageUpload = document.querySelector('.image-upload')
+    if(imagePreview){
+        imagePreview.src = imageUrl;
+    }
+    if(previewContainer){
+        previewContainer.classList.add('image');
+    }
+    if(imageUpload){
+        imageUpload.classList.add('hidden');       
+    }
+}
+
+// fonction pour vérifier la validité du formulaire 
+function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview) {
+    if (form) {
+        form.addEventListener('input', () => {
+            if (formTitle && formCategories && formImage) {
+                if (!formTitle.value && formCategories.value) {
+                    if (errorForm) {
+                        errorForm.classList.add('visible');
+                    }
+                } else {
+                    if (errorForm) {
+                        errorForm.classList.remove('visible');
+                    }
+                }
+
+                if (formTitle.value && formCategories.value && formImage.files.length > 0) {
+                    if (buttonValidatePhoto) {
+                        buttonValidatePhoto.disabled = false;
+                        buttonValidatePhoto.classList.add('enabled');
+                    }
+                } else {
+                    buttonValidatePhoto.disabled = true;
+                    buttonValidatePhoto.classList.remove('enabled');
+                }
+            }
+        });
+
+        form.addEventListener('change', () => {
+            if (formImage.files.length > 0) {
+                const validExtensions = ['jpg', 'jpeg', 'png'];
+                const file = formImage.files[0];
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                if (validExtensions.includes(fileExtension)) {
+                    console.log('Ceci est une image.');
+                    imgPreview(file, imagePreview);
+                } else {
+                    if (errorImg) {
+                        errorImg.classList.add('visible');
+                    }
+                    console.log("Ce fichier n'est pas une image.");
+                }
+            }
+        });
+    }
+}
+
+
+// fonction pour mettre le click de l'input file sur bouton
+function setupUploadButton(uploadButton, formImage, errorImg) {
+    if (uploadButton) {
+        uploadButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            if (formImage && !formImage.files.length) {
+                formImage.click();
+            }
+            if (errorImg && errorImg.classList.contains('visible')) {
+                errorImg.classList.remove('visible');
+            }
+        });
+    }
+}
+
+
 // fonction pour ouvrir et charger la modale 
 async function loadModal(){
     try{

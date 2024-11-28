@@ -74,26 +74,30 @@
 		</div>
 		<div class="display-add">
 			<div class="xmark-container">
-				<i class="fa-solid fa-xmark"></i>
+				<i class="fa-solid fa-xmark"></i><i class="fa-solid fa-arrow-left"></i>
 			</div>
 			<h2 class="modal-title">Ajout photo</h2>
-			<div class="modal-add">
-				<form id="imageUploadForm">
-					<div id="previewContainer">
-						<div>
+			<form id="image-upload-form">
+					<div id="preview-container">
+						<p class="error-img">Ce format de fichier n'est pas pris en charge</p>
+						<div class="image-upload">
 							<i class="fa-regular fa-image"></i>
 							<input type="file" id="image" name="image" accept=".jpg, .jpeg, .png" required>
+							<button id="upload-button">+ Ajouter photo</button>
+							<p>jpg, png : 4mo max</p>
 						</div>
-						<img id="imagePreview" class="imagePreview">
+						<img id="image-preview" class="image-preview">
 					</div>
-					<label for="title">Titre</label>
-					<input type="text" id="title" name="title" required>					
-					<label for="categories">Catégorie</label>
-					<select id="categories" name="categories" required>
-					</select>			
-					<button type="submit" disabled>Valider</button>
-				</form>
-			</div>
+					<div class="inputs-container">
+						<label for="title">Titre</label>
+						<p class="error-form">le champ Titre est requis</p>
+						<input type="text" id="title" name="title" required>					
+						<label for="categories">Catégorie</label>
+						<select id="categories" name="categories" required>
+						</select>
+					</div>			
+					<button type="submit" class="add-photo-btn"disabled>Valider</button>
+			</form>
 			<p class="error-http">l'action n'a pas pu être effectuée,<br></br>si le problème persiste contactez le webmaster</p>
 		</div>
 	</div>
