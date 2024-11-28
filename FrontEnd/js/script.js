@@ -259,6 +259,27 @@ function returnModal(modal, displayAdd, displayWorks){
     }, 300);
 }
 
+// fonction pour reset le formulaire 
+function resetForm(imagePreview, formImage, form){
+    const imageUploadHidden = document.querySelector('.image-upload.hidden');
+    const previewContainer = document.getElementById('preview-container');
+    if(form){ 
+        form.reset();
+    }
+    if (formImage) {
+        formImage.value = '';
+    }
+    if (imagePreview) {
+        imagePreview.src = '';
+    }           
+    if(imageUploadHidden){
+        imageUploadHidden.classList.remove('hidden');
+    }
+    if(previewContainer){
+        previewContainer.classList.remove('image');
+    }
+}
+
 // fonction pour l'ajout photo de la modale
 function addPhoto(categories) {
     const modal = document.querySelector('.modal');
@@ -281,8 +302,7 @@ function addPhoto(categories) {
 
     setupModal(buttonAddPhoto, modal, displayWorks, displayAdd);
     createCategories(categorySelect, categories);
-    setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview);
-    setupUploadButton(uploadButton, formImage, errorImg);    
+    setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview, uploadButton);    
     if(returnIcone){
         returnIcone.addEventListener('click', () =>{
             returnModal(modal, displayAdd, displayWorks);
@@ -290,7 +310,9 @@ function addPhoto(categories) {
     }
     if(closeIcone){
         closeIcone.addEventListener('click', () =>{
+            resetForm(imagePreview, formImage, form);
             closeModal();
+            
         })
     }
 }
@@ -357,10 +379,11 @@ function imgPreview(file, imagePreview){
     if(imageUpload){
         imageUpload.classList.add('hidden');       
     }
+    
 }
 
 // fonction pour vérifier la validité du formulaire 
-function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview) {
+function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview, uploadButton) {
     if (form) {
         form.addEventListener('input', () => {
             if (formTitle && formCategories && formImage) {
@@ -402,25 +425,16 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                 }
             }
         });
+
+        uploadButton.addEventListener('click', () =>{
+            if (errorImg) {
+                if(errorImg.classList.contains('visible'))
+                    errorImg.classList.remove('visible');
+            }
+        })
+
     }
 }
-
-
-// fonction pour mettre le click de l'input file sur bouton
-function setupUploadButton(uploadButton, formImage, errorImg) {
-    if (uploadButton) {
-        uploadButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            if (formImage && !formImage.files.length) {
-                formImage.click();
-            }
-            if (errorImg && errorImg.classList.contains('visible')) {
-                errorImg.classList.remove('visible');
-            }
-        });
-    }
-}
-
 
 // fonction pour ouvrir et charger la modale 
 async function loadModal(){

@@ -583,7 +583,7 @@ body.hidden {
 	font-size: 21px;
 	cursor: pointer;
 }
-#upload-button{
+#upload-button.upload-button {
 	max-width: 173px;
 	width: 100%;
 	height: 36px;
@@ -595,6 +595,9 @@ body.hidden {
 	font-weight: 500;
 	font-family: 'Work Sans';
 	cursor: pointer;
+	margin-top: 0;
+    text-align: center;
+    line-height: 2.5;
 }
 .inputs-container{
 	display: flex;
