@@ -191,6 +191,9 @@ async function deleteWork(works, token, addPhotoLoaded) {
                                         if(displayWorks.classList.contains('error-server')){
                                             displayWorks.classList.remove('error-server');             
                                         };
+                                        if(displayWorks.classList.contains('error-suppr-http')){
+                                            displayWorks.classList.remove('error-suppr-http');
+                                        }
                                     }
                                     // Appel API pour supprimer works
                                     await deleteWorkApi(apiUrl, apiDelete, work.id, token);
@@ -202,8 +205,14 @@ async function deleteWork(works, token, addPhotoLoaded) {
                                     const newWorks = works.filter(work => `work-${work.id}` !== btnsDelete.id);
                                     createWorks(newWorks);
                                     console.log("new works:",newWorks)
-
+                                    
                                 } catch (error) {
+                                    const displayWorks = document.querySelector('.display-works');
+                                    if(displayWorks){
+                                            displayWorks.classList.add('error-suppr-http');
+                                        }
+                                       
+                                    
                                     console.log(error);
                                     
                                 }
@@ -246,9 +255,11 @@ function returnModal(modal, displayAdd, displayWorks){
             modal.classList.add('overflow');
             displayAdd.classList.remove('visible');
             setTimeout(() => {
-                displayAdd.classList.remove('open');
-                modal.classList.add('overflow');                        
+                displayAdd.classList.remove('open');                      
             }, 200)
+            setTimeout(() => {
+                modal.classList.remove('overflow');                      
+            }, 500)
         }
     }
     setTimeout(() => {
@@ -409,10 +420,20 @@ async function sendNewProject(form, file, title, category, token, imagePreview, 
             if (response.ok) {
                 const result = await response.json();
                 const displayAdd = document.querySelector('.display-add');
+                const displayWorks = document.querySelector('.display-works');
                 const submitSuccess = document.querySelector('.submit-success.hidden');
                 if(displayAdd){
                     if(displayAdd.classList.contains('error-server')){
                         displayAdd.classList.remove('error-server');
+                    }
+                    
+                }
+                if(displayWorks){
+                    if(displayWorks.classList.contains('error-server')){
+                        displayWorks.classList.remove('error-server');
+                    }
+                    if(displayWorks.classList.contains('error-suppr-http')){
+                        displayWorks.classList.remove('error-suppr-http');
                     }
                     
                 }
@@ -564,8 +585,10 @@ async function loadModal(token, addPhotoLoaded){
                 closeModal(); 
             });
         } return addPhotoLoaded
-    }catch{
-        errorModal()  
+    }catch(error){
+        console.log(error)
+        errorModal()
+        return addPhotoLoaded  
     } 
 }
 
@@ -593,6 +616,9 @@ function errorModal(){
     }
     if(displayWorks){
         displayWorks.classList.add('error-server');
+        if(displayWorks.classList.contains('error-suppr-http')){
+            displayWorks.classList.remove('error-suppr-http');
+        }
     }
     if(displayAdd){
         displayAdd.classList.add('error-server');

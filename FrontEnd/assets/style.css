@@ -427,6 +427,19 @@ body.hidden {
     border: 1px solid #cd8888;
     border-radius: 5px;	
 }
+.error-suppr{
+	display:none;
+	color:red;
+}
+.display-works.error-suppr-http .error-suppr{
+	display:block;
+	text-align: center;
+    padding: 20px;
+    background-color: #f3adad;
+    margin: 5px 30px;
+    border: 1px solid #cd8888;
+    border-radius: 5px;	
+}
 .display-add.open.visible.error-server .error-http{
 	display:block;
 	text-align: center;
