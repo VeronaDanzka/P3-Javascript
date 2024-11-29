@@ -219,7 +219,7 @@ nav img {
 	margin-bottom: 40px;
 	margin-top: 50px;
 }
-.btns-container .hidden{
+.btns-container.hidden{
 	display:none;
 }
 
@@ -421,7 +421,20 @@ body.hidden {
 .display-works.error-server .error-http{
 	display:block;
 	text-align: center;
-    margin-top: 10px;	
+    padding: 20px;
+    background-color: #f3adad;
+    margin: 5px 30px;
+    border: 1px solid #cd8888;
+    border-radius: 5px;	
+}
+.display-add.open.visible.error-server .error-http{
+	display:block;
+	text-align: center;
+    padding: 20px;
+    background-color: #f3adad;
+    margin: 5px 30px;
+    border: 1px solid #cd8888;
+    border-radius: 5px;	
 }
 .display-add {
 	display: none;
@@ -646,9 +659,14 @@ body.hidden {
 	display:none;
 }
 .error-img.visible{
-	display:block;
-	text-align: center;
+	display: block;
+    text-align: center;
     color: red;
+	padding: 20px;
+    background-color: #f3adad;
+    margin: 0 30px;
+    border: 1px solid #cd8888;
+    border-radius: 5px;
 }
 .image-upload.hidden{
 	display:none;
@@ -662,6 +680,18 @@ body.hidden {
     display: flex;
     flex-direction: column;
 	padding: 0;
+}
+.submit-success.hidden{
+	display: none;
+}
+.submit-success{
+	display: block;
+	color: green;
+    margin-bottom: 5px;
+    padding: 20px;
+    background-color: #94f394;
+    border: 1px solid #67c567;
+    border-radius: 5px;
 }
 
 

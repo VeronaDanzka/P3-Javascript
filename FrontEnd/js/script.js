@@ -226,12 +226,16 @@ function closeModal(){
     const body = document.querySelector('body');
     const modalContainer = document.querySelector('.modal-container');
     const modalWorks = document.querySelector('.modal-works');
+    const submitSuccess = document.querySelector('.submit-success');
     if(modalContainer){
         modalContainer.classList.add('close');
     }
     body.classList.remove('hidden');
     if(modalWorks){
         modalWorks.innerHTML = "";
+    }
+    if(submitSuccess){
+        submitSuccess.classList.add('hidden');        
     }
 }
 
@@ -260,11 +264,14 @@ function returnModal(modal, displayAdd, displayWorks){
 }
 
 // fonction pour reset le formulaire 
-function resetForm(imagePreview, formImage, form){
+function resetForm(imagePreview, formImage, form, buttonValidatePhoto){
     const imageUploadHidden = document.querySelector('.image-upload.hidden');
     const previewContainer = document.getElementById('preview-container');
+    
     if(form){ 
+        const select = form.elements['categories'];
         form.reset();
+        select.value = null;
     }
     if (formImage) {
         formImage.value = null;
@@ -277,6 +284,10 @@ function resetForm(imagePreview, formImage, form){
     }
     if(previewContainer){
         previewContainer.classList.remove('image');
+    }
+    if(buttonValidatePhoto){
+        buttonValidatePhoto.disabled = true;
+        buttonValidatePhoto.classList.remove('enabled');
     }
 }
 
@@ -311,8 +322,10 @@ function addPhoto(categories, token) {
     }
     if(closeIcone){
         closeIcone.addEventListener('click', () =>{
-            resetForm(imagePreview, formImage, form);
+            resetForm(imagePreview, formImage, form, buttonValidatePhoto);
             closeModal();
+            returnModal(modal, displayAdd, displayWorks);
+
             
         })
     }
@@ -367,11 +380,16 @@ function createCategories(categorySelect, categories) {
 }
 
 // mettre à jour les projets dans la modale dans le cas où l'utilisateur retourne à la step 1 et en arrière plan
-// function updateProjects(){
-//     loadData()
-// } 
+async function updateProjects(token){
+    const dataLoaded = await loadData();
+    if (dataLoaded.works){
+        createWorks(dataLoaded.works);  
+    }
+    loadModal(token, true)
+}
+
 // fonction pour envoyer le nouveau projet via l'API
-async function sendNewProject(form, file, title, category, token, imagePreview, formImage){
+async function sendNewProject(form, file, title, category, token, imagePreview, formImage, buttonValidatePhoto){
     console.log("sendNewProject", token)
     const formData = new FormData(); // utilisation de FormData pour multipart/form-data
     if(file && title && category){
@@ -390,17 +408,29 @@ async function sendNewProject(form, file, title, category, token, imagePreview, 
 
             if (response.ok) {
                 const result = await response.json();
-                resetForm(imagePreview, formImage, form)
+                const displayAdd = document.querySelector('.display-add');
+                const submitSuccess = document.querySelector('.submit-success.hidden');
+                if(displayAdd){
+                    if(displayAdd.classList.contains('error-server')){
+                        displayAdd.classList.remove('error-server');
+                    }
+                    
+                }
+                if(submitSuccess){
+                    submitSuccess.classList.remove('hidden');
+                }
+                resetForm(imagePreview, formImage, form, buttonValidatePhoto);
+                updateProjects(token);
                 console.log('Succès :', result);
-            } else {
-                console.error('Erreur :', response.status, await response.text());
             }
         } catch (error) {
             console.error('Erreur réseau :', error);
+            errorModal();
         }
     } 
         
 }
+
 // fonction pour image preview 
 function imgPreview(file, imagePreview){
     const imageUrl = URL.createObjectURL(file);
@@ -471,13 +501,17 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                 if(errorImg.classList.contains('visible'))
                     errorImg.classList.remove('visible');
             }
+            const submitSuccess = document.querySelector('.submit-success');
+            if(submitSuccess){
+                submitSuccess.classList.add('hidden');
+            }
         })
     }
-    form.addEventListener('submit', async (event) =>{
+    form.addEventListener('submit', (event) =>{
         event.preventDefault();
         const file = formImage.files[0];
         if (formTitle.value && formCategories.value && formImage.files.length > 0){
-            sendNewProject(form, file, formTitle.value, formCategories.value, token, imagePreview, formImage);
+            sendNewProject(form, file, formTitle.value, formCategories.value, token, imagePreview, formImage, buttonValidatePhoto);
         } 
     })
     
@@ -542,6 +576,7 @@ function errorModal(){
     const body = document.querySelector('body');
     const iconeClose = document.querySelector('.fa-xmark')
     const displayWorks = document.querySelector('.display-works');
+    const displayAdd = document.querySelector('.display-add');
     body.classList.add('hidden');
     if(modalWorks){
         modalWorks.innerHTML = "";
@@ -551,15 +586,22 @@ function errorModal(){
         modalContainer.addEventListener('click', (event) => {
             if (event.target === event.currentTarget){
                 closeModal();
+                displayWorks.classList.remove('error-server');
+                displayAdd.classList.remove('error-server');
             };          
         });
     }
     if(displayWorks){
         displayWorks.classList.add('error-server');
     }
+    if(displayAdd){
+        displayAdd.classList.add('error-server');
+    }
     if(iconeClose){
         iconeClose.addEventListener('click', () => {
-            closeModal(); 
+            closeModal();
+            displayWorks.classList.remove('error-server');
+            displayAdd.classList.remove('error-server'); 
         });
     }    
 }
