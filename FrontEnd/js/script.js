@@ -1,5 +1,5 @@
 import { apiUrl, apiGet, apiPost, apiDelete } from './config.js';
-import { getCookie } from './login.js'
+import { getCookieValue } from './login.js'
 
 // Fonction erreur affichage api
 function errorApi() {
@@ -131,17 +131,16 @@ function filtreBtns() {
 
 // fonction pour se déconnecter
 function logout(name) {
-    if (getCookie(name)) {
+    if (getCookieValue(name)) {
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     }
 }
 
 
-
 // fonction pour api fetch delete
-async function deleteWorkApi(api, apiDelete, workId){
+async function deleteWorkApi(api, apiDelete, workId, token){
+    console.log("deleteWorkApi", token)
     try {
-        const token = localStorage.getItem('authToken');
         const dataResponse = await fetch(`${api}${apiDelete[0]}/${workId}`, {
             method: "delete",
             headers: {
@@ -162,7 +161,8 @@ async function deleteWorkApi(api, apiDelete, workId){
 }
 
 // fonction pour supprimer des works 
-async function deleteWork(works) {
+async function deleteWork(works, token, addPhotoLoaded) {
+    console.log("deleteWork", token)
     const figures = document.querySelectorAll('.modal-works figure');
     if(figures){
         figures.forEach(figure => {
@@ -193,10 +193,10 @@ async function deleteWork(works) {
                                         };
                                     }
                                     // Appel API pour supprimer works
-                                    await deleteWorkApi(apiUrl, apiDelete, work.id);
+                                    await deleteWorkApi(apiUrl, apiDelete, work.id, token);
 
                                     // mise à jour des works modale
-                                    loadModal();
+                                    loadModal(token, addPhotoLoaded);
                                     
                                     // mise à jour des works background
                                     const newWorks = works.filter(work => `work-${work.id}` !== btnsDelete.id);
@@ -267,7 +267,7 @@ function resetForm(imagePreview, formImage, form){
         form.reset();
     }
     if (formImage) {
-        formImage.value = '';
+        formImage.value = null;
     }
     if (imagePreview) {
         imagePreview.src = '';
@@ -281,7 +281,8 @@ function resetForm(imagePreview, formImage, form){
 }
 
 // fonction pour l'ajout photo de la modale
-function addPhoto(categories) {
+function addPhoto(categories, token) {
+    console.log("addPhoto", token)
     const modal = document.querySelector('.modal');
     const buttonAddPhoto = document.getElementById('add-work');
     const displayAdd = document.querySelector('.display-add');
@@ -302,7 +303,7 @@ function addPhoto(categories) {
 
     setupModal(buttonAddPhoto, modal, displayWorks, displayAdd);
     createCategories(categorySelect, categories);
-    setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview, uploadButton);    
+    setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview, uploadButton, token);    
     if(returnIcone){
         returnIcone.addEventListener('click', () =>{
             returnModal(modal, displayAdd, displayWorks);
@@ -365,6 +366,41 @@ function createCategories(categorySelect, categories) {
     }
 }
 
+// mettre à jour les projets dans la modale dans le cas où l'utilisateur retourne à la step 1 et en arrière plan
+// function updateProjects(){
+//     loadData()
+// } 
+// fonction pour envoyer le nouveau projet via l'API
+async function sendNewProject(form, file, title, category, token, imagePreview, formImage){
+    console.log("sendNewProject", token)
+    const formData = new FormData(); // utilisation de FormData pour multipart/form-data
+    if(file && title && category){
+        formData.append('image', file); 
+        formData.append('title', title); 
+        formData.append('category', category);
+        try {
+            const response = await fetch(`${apiUrl}${apiPost[1]}`, {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                resetForm(imagePreview, formImage, form)
+                console.log('Succès :', result);
+            } else {
+                console.error('Erreur :', response.status, await response.text());
+            }
+        } catch (error) {
+            console.error('Erreur réseau :', error);
+        }
+    } 
+        
+}
 // fonction pour image preview 
 function imgPreview(file, imagePreview){
     const imageUrl = URL.createObjectURL(file);
@@ -383,7 +419,8 @@ function imgPreview(file, imagePreview){
 }
 
 // fonction pour vérifier la validité du formulaire 
-function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview, uploadButton) {
+function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview, uploadButton, token) {
+    console.log("setupFormValidation",token)
     if (form) {
         form.addEventListener('input', () => {
             if (formTitle && formCategories && formImage) {
@@ -402,14 +439,16 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                         buttonValidatePhoto.disabled = false;
                         buttonValidatePhoto.classList.add('enabled');
                     }
+                    
                 } else {
                     buttonValidatePhoto.disabled = true;
                     buttonValidatePhoto.classList.remove('enabled');
                 }
-            }
+            }            
         });
-
-        form.addEventListener('change', () => {
+    }
+    if(formImage){
+        formImage.addEventListener('change', () => {
             if (formImage.files.length > 0) {
                 const validExtensions = ['jpg', 'jpeg', 'png'];
                 const file = formImage.files[0];
@@ -425,19 +464,28 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                 }
             }
         });
-
+    }    
+    if(uploadButton){
         uploadButton.addEventListener('click', () =>{
             if (errorImg) {
                 if(errorImg.classList.contains('visible'))
                     errorImg.classList.remove('visible');
             }
         })
-
     }
+    form.addEventListener('submit', async (event) =>{
+        event.preventDefault();
+        const file = formImage.files[0];
+        if (formTitle.value && formCategories.value && formImage.files.length > 0){
+            sendNewProject(form, file, formTitle.value, formCategories.value, token, imagePreview, formImage);
+        } 
+    })
+    
 }
 
 // fonction pour ouvrir et charger la modale 
-async function loadModal(){
+async function loadModal(token, addPhotoLoaded){
+    console.log("loadModal",token)
     try{
         const dataLoaded = await loadData();    
         const works = dataLoaded.works
@@ -463,9 +511,12 @@ async function loadModal(){
             figure.appendChild(img);
             figure.appendChild(button);
             modalWorks.appendChild(figure);
-        })
-        deleteWork(works);
-        addPhoto(categories);
+        })        
+        deleteWork(works, token, true);
+        if(!addPhotoLoaded){
+            addPhoto(categories, token);
+            addPhotoLoaded = true;
+        }
         if(modalContainer){
             modalContainer.classList.remove('close');
             modalContainer.addEventListener('click', (event) => {
@@ -478,10 +529,10 @@ async function loadModal(){
             iconeClose.addEventListener('click', () => {
                 closeModal(); 
             });
-        }
+        } return addPhotoLoaded
     }catch{
         errorModal()  
-    }
+    } 
 }
 
 // Fonction d'ouverture de la modale erreur api
@@ -516,9 +567,9 @@ function errorModal(){
 // Lancer la fonction au démarrage de la page
 export async function init() {
     const dataLoaded = await loadData();
-    if (getCookie('authToken')) {
+    const token = getCookieValue('authToken');
+    if (token) {
         const body = document.querySelector('body');
-        const token = localStorage.getItem("authToken");
         const loginLink = document.querySelector('#login');
         const projectsTitle = document.querySelector('.projects-title');
         const btnsContainer = document.querySelector('.btns-container');
@@ -537,11 +588,14 @@ export async function init() {
         if(projectsTitle){
             projectsTitle.classList.toggle('edit-mode');
         }
+        let addPhotoLoaded = false;
+        console.log(addPhotoLoaded)
         if(modalListeners){
             modalListeners.forEach(listener => {
-                listener.addEventListener('click', () => {                
+                listener.addEventListener('click', async () => {                
                     if (dataLoaded.works && dataLoaded.categories) {
-                        loadModal();
+                        addPhotoLoaded = await loadModal(token, addPhotoLoaded);
+                        console.log(addPhotoLoaded)
                     } else {
                         errorModal();
                     }

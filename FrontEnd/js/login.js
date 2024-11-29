@@ -31,13 +31,14 @@ function setCookie(name, value, days) {
 }
 
 // Fonction pour récupérer la valeur d'un cookie
-export function getCookie(name) {
+export function getCookieValue(name) {
     if (document.cookie) {
         console.log(document.cookie)
         const cookies = document.cookie.split('; ');
         for (const cookie of cookies) {
             const [key, value] = cookie.split('=');
             if (key === name) {
+                console.log(value)
                 return decodeURIComponent(value); // dans le cas où le cookie contiendrait un caractère spécial
             }
             else {
@@ -51,41 +52,48 @@ export function getCookie(name) {
 
 // Fonction submit du formulaire avec gestion des erreurs
 function submitLogin() {
-    if(!getCookie("authToken")){
+    if(!getCookieValue("authToken")){
         const formLogin = document.querySelector(".login-form");
         formLogin.addEventListener("submit", async (event) => {
             event.preventDefault();
             const user = document.querySelector("#email");
             const password = document.querySelector("#password");
-            const userInput = user.value;
-            const passwordInput = password.value;
-            const postObject = {"email": userInput,
-                                "password": passwordInput};
-            const postJson = JSON.stringify(postObject)
-            try {
-                const response = await loginPostApi(`${apiUrl}${apiPost[0]}`, postJson);
-                setCookie("authToken", response.token, 21) // Enregistre le token pour les prochaines sessions
-                localStorage.setItem("authToken", response.token); // Enregistre le token
-                console.log(response.token)
-                window.location.href = "../index.html"; // Redirige vers la page d'accueil pour activer le mode edit
-            } catch (error) {
-                const inputs = formLogin.querySelectorAll('input');
-                if (error.message.includes("Failed to fetch")){                    
-                    formLogin.classList.add('error-server');
-                }
-                else {
-                    formLogin.classList.add('error');
-                }
-                if(inputs){
-                    inputs.forEach( input => {
-                        input.addEventListener('focus', () => {
-                            formLogin.classList.remove('error');
-                            if (error.message.includes("Failed to fetch")){                    
-                                formLogin.classList.remove('error-server');
-                            } 
+            let userInput = null
+            let passwordInput = null
+            if(user){
+                userInput = user.value;
+            }
+            if(password){
+                passwordInput = password.value;
+            }
+            if(userInput && passwordInput){
+                const postObject = {"email": userInput,
+                                    "password": passwordInput};
+                const postJson = JSON.stringify(postObject)
+                try {
+                    const response = await loginPostApi(`${apiUrl}${apiPost[0]}`, postJson);
+                    setCookie("authToken", response.token, 21) // Enregistre le token pour les prochaines sessions
+                    console.log(response.token)
+                    window.location.href = "../index.html"; // Redirige vers la page d'accueil pour activer le mode edit
+                } catch (error) {
+                    const inputs = formLogin.querySelectorAll('input');
+                    if (error.message.includes("Failed to fetch")){                    
+                        formLogin.classList.add('error-server');
+                    }
+                    else {
+                        formLogin.classList.add('error');
+                    }
+                    if(inputs){
+                        inputs.forEach( input => {
+                            input.addEventListener('focus', () => {
+                                formLogin.classList.remove('error');
+                                if (error.message.includes("Failed to fetch")){                    
+                                    formLogin.classList.remove('error-server');
+                                } 
+                            })
                         })
-                    })
-                }               
+                    }               
+                }
             }
         });
     } else {
