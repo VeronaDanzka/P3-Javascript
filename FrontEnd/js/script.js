@@ -91,7 +91,6 @@ function filtreWorks(figures, button) {
             setTimeout(() => {
                 if (figure.classList.contains('hidden')){
                     figure.classList.remove('hidden');
-                    figure.classList.add('block');
                 }                
                 setTimeout(() => {
                     if (figure.classList.contains('invisible')){
