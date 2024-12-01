@@ -318,6 +318,7 @@ function addPhoto(categories, token) {
     const errorForm = document.querySelector('.error-form');
     const uploadButton = document.getElementById('upload-button');
     const errorImg = document.querySelector('.error-img');
+    const errorSize = document.querySelector('.error-size');
     const returnIcone = document.querySelector('.fa-arrow-left');
     const closeIcone = displayAdd.querySelector('.fa-xmark');
     const imagePreview = document.getElementById('image-preview');
@@ -325,7 +326,7 @@ function addPhoto(categories, token) {
 
     setupModal(buttonAddPhoto, modal, displayWorks, displayAdd);
     createCategories(categorySelect, categories);
-    setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview, uploadButton, token);    
+    setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, errorSize, imagePreview, uploadButton, token);    
     if(returnIcone){
         returnIcone.addEventListener('click', () =>{
             returnModal(modal, displayAdd, displayWorks);
@@ -470,10 +471,10 @@ function imgPreview(file, imagePreview){
 }
 
 // fonction pour vérifier la validité du formulaire 
-function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, imagePreview, uploadButton, token) {
+function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, errorSize, imagePreview, uploadButton, token) {
     console.log("setupFormValidation",token)
     if (form) {
-        form.addEventListener('input', () => {
+        form.addEventListener('focus', () => {
             if (formTitle && formCategories && formImage) {
                 if (!formTitle.value && formCategories.value) {
                     if (errorForm) {
@@ -503,15 +504,25 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
             if (formImage.files.length > 0) {
                 const validExtensions = ['jpg', 'jpeg', 'png'];
                 const file = formImage.files[0];
+                const maxSizeInBytes = 4 * 1024 * 1024;
                 const fileExtension = file.name.split('.').pop().toLowerCase();
-                if (validExtensions.includes(fileExtension)) {
+                if (validExtensions.includes(fileExtension) && file.size <= maxSizeInBytes) {
                     console.log('Ceci est une image.');
                     imgPreview(file, imagePreview);
-                } else {
+                } 
+                if (!validExtensions.includes(fileExtension)){
                     if (errorImg) {
                         errorImg.classList.add('visible');
                     }
+                    formImage.value = null;
                     console.log("Ce fichier n'est pas une image.");
+                }
+                if (file.size > maxSizeInBytes) {
+                    if (errorSize) {
+                        errorSize.classList.add('visible');
+                    }
+                    formImage.value = null;
+                    console.log("La taille de l'image dépasse 4 Mo.");
                 }
             }
         });
@@ -521,6 +532,10 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
             if (errorImg) {
                 if(errorImg.classList.contains('visible'))
                     errorImg.classList.remove('visible');
+            }
+            if (errorSize) {
+                if(errorSize.classList.contains('visible'))
+                    errorSize.classList.remove('visible');
             }
             const submitSuccess = document.querySelector('.submit-success');
             if(submitSuccess){

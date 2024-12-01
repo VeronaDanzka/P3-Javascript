@@ -668,10 +668,10 @@ body.hidden {
 .error-form.visible{
 	display:block;
 }
-.error-img{
+.error-img, .error-size{
 	display:none;
 }
-.error-img.visible{
+.error-img.visible, .error-size.visible{
 	display: block;
     text-align: center;
     color: red;
