@@ -70,30 +70,30 @@
 			<h2 class="modal-title">Galerie photo</h2>
 			<div class="modal-works"></div>
 			<button class="modal-btn" id="add-work">Ajouter une photo</button>
-			<p class="error-suppr">l'action n'a pas pu être effectuée,<br></br>si le problème persiste contactez le webmaster</p>
-			<p class="error-http">Une erreur s'est produite, les projets n'ont pas pu être chargés</p>
+			<p class="error-suppr" aria-hidden="true">l'action n'a pas pu être effectuée,<br></br>si le problème persiste contactez le webmaster</p>
+			<p class="error-http" aria-hidden="true">Une erreur s'est produite, les projets n'ont pas pu être chargés</p>
 		</div>
-		<div class="display-add">
+		<div class="display-add" aria-hidden="true">
 			<div class="xmark-container">
 				<i class="fa-solid fa-xmark"></i><i class="fa-solid fa-arrow-left"></i>
 			</div>
 			<h2 class="modal-title">Ajout photo</h2>
 			<form id="image-upload-form">
-					<p class="submit-success hidden">nouveau projet ajouté !</p>
+					<p class="submit-success hidden" aria-hidden="true">nouveau projet ajouté !</p>
 					<div id="preview-container">
-						<p class="error-img">Ce format de fichier n'est pas pris en charge</p>
-						<p class="error-size">Ce fichier est trop volumineux (max: 4mo)</p>
+						<p class="error-img" aria-hidden="true">Ce format de fichier n'est pas pris en charge</p>
+						<p class="error-size" aria-hidden="true">Ce fichier est trop volumineux (max: 4mo)</p>
 						<div class="image-upload">
 							<i class="fa-regular fa-image"></i>
-							<input type="file" id="image" name="image" accept=".jpg, .jpeg, .png" required>
+							<input type="file" id="image" name="image" accept=".jpg, .jpeg, .png" aria-hidden="true" required>
 							<label for="image" id="upload-button" class="upload-button">+ Ajouter photo</label>
 							<p>jpg, png : 4mo max</p>
 						</div>
-						<img id="image-preview" class="image-preview">
+						<img id="image-preview" class="image-preview" aria-hidden="true">
 					</div>
 					<div class="inputs-container">
 						<label for="title">Titre</label>
-						<p class="error-form">le champ Titre est requis</p>
+						<p class="error-form" aria-hidden="true">le champ Titre est requis</p>
 						<input type="text" id="title" name="title" required>					
 						<label for="categories">Catégorie</label>
 						<select id="categories" name="categories" required>
@@ -101,7 +101,7 @@
 					</div>			
 					<button type="submit" class="add-photo-btn"disabled>Valider</button>
 			</form>
-			<p class="error-http">l'action n'a pas pu être effectuée,<br></br>si le problème persiste contactez le webmaster</p>
+			<p class="error-http" aria-hidden="true">l'action n'a pas pu être effectuée,<br></br>si le problème persiste contactez le webmaster</p>
 		</div>
 	</div>
 </aside>

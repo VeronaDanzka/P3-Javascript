@@ -91,6 +91,7 @@ function filtreWorks(figures, button) {
             setTimeout(() => {
                 if (figure.classList.contains('hidden')){
                     figure.classList.remove('hidden');
+                    figure.setAttribute('aria-hidden', 'false')
                 }                
                 setTimeout(() => {
                     if (figure.classList.contains('invisible')){
@@ -105,6 +106,7 @@ function filtreWorks(figures, button) {
                 figure.classList.add('invisible');
                 setTimeout(() => {
                     figure.classList.add('hidden');
+                    figure.setAttribute('aria-hidden', 'true')
                 }, 200);
             }, 100);
         }
@@ -186,12 +188,20 @@ async function deleteWork(works, token, addPhotoLoaded) {
                                 try {
                                     console.log(work.id);
                                     const displayWorks = document.querySelector('.display-works');
+                                    const errorHttpWorks = displayWorks.querySelector('.error-http');
+                                    const errorSuppr = displayWorks.querySelector('.error-suppr');
                                     if(displayWorks){
                                         if(displayWorks.classList.contains('error-server')){
-                                            displayWorks.classList.remove('error-server');             
+                                            displayWorks.classList.remove('error-server');
+                                            if(errorHttpWorks){
+                                                errorHttpWorks.setAttribute('aria-hidden', 'true')
+                                            }             
                                         };
                                         if(displayWorks.classList.contains('error-suppr-http')){
                                             displayWorks.classList.remove('error-suppr-http');
+                                            if(errorSuppr){
+                                                errorSuppr.setAttribute('aria-hidden', 'true')
+                                            }
                                         }
                                     }
                                     // Appel API pour supprimer works
@@ -207,8 +217,12 @@ async function deleteWork(works, token, addPhotoLoaded) {
                                     
                                 } catch (error) {
                                     const displayWorks = document.querySelector('.display-works');
+                                    const errorSuppr = displayWorks.querySelector('.error-suppr');
                                     if(displayWorks){
                                             displayWorks.classList.add('error-suppr-http');
+                                            if(errorSuppr){
+                                                errorSuppr.setAttribute('aria-hidden', 'false')
+                                            }
                                         }
                                        
                                     
@@ -243,13 +257,15 @@ function closeModal(){
         modalWorks.innerHTML = "";
     }
     if(submitSuccess){
-        submitSuccess.classList.add('hidden');        
+        submitSuccess.classList.add('hidden');
+        submitSuccess.setAttribute('aria-hidden', 'true');        
     }
 }
 
 //fonction pour retourner en arrière dans la modale
 function returnModal(modal, displayAdd, displayWorks){
     if(displayAdd){
+        displayAdd.setAttribute('aria-hidden', 'true');
         if(modal){
             modal.classList.add('overflow');
             displayAdd.classList.remove('visible');
@@ -263,6 +279,7 @@ function returnModal(modal, displayAdd, displayWorks){
     }
     setTimeout(() => {
         if(displayWorks){
+            displayWorks.setAttribute('aria-hidden', 'false');
             displayWorks.classList.remove('hidden');
         }
     }, 200);
@@ -274,10 +291,27 @@ function returnModal(modal, displayAdd, displayWorks){
 }
 
 // fonction pour reset le formulaire 
-function resetForm(imagePreview, formImage, form, buttonValidatePhoto){
+function resetForm(imagePreview, formImage, form, buttonValidatePhoto, errorForm, errorImg, errorSize){
     const imageUploadHidden = document.querySelector('.image-upload.hidden');
     const previewContainer = document.getElementById('preview-container');
-    
+    if (errorForm) {
+        if(errorForm.classList.contains('visible')){
+            errorForm.classList.remove('visible');
+            errorForm.setAttribute('aria-hidden', 'true');
+        }
+    }
+    if (errorImg) {
+        if(errorImg.classList.contains('visible')){
+            errorImg.classList.remove('visible');
+            errorImg.setAttribute('aria-hidden', 'true');
+        }
+    }
+    if (errorSize) {
+        if(errorSize.classList.contains('visible')){
+            errorSize.classList.remove('visible');
+            errorSize.setAttribute('aria-hidden', 'true');
+        }
+    }
     if(form){ 
         const select = form.elements['categories'];
         form.reset();
@@ -288,9 +322,11 @@ function resetForm(imagePreview, formImage, form, buttonValidatePhoto){
     }
     if (imagePreview) {
         imagePreview.src = '';
+        imagePreview.setAttribute('aria-hidden', 'true');
     }           
     if(imageUploadHidden){
         imageUploadHidden.classList.remove('hidden');
+        imageUploadHidden.setAttribute('aria-hidden', 'false');
     }
     if(previewContainer){
         previewContainer.classList.remove('image');
@@ -333,7 +369,7 @@ function addPhoto(categories, token) {
     }
     if(closeIcone){
         closeIcone.addEventListener('click', () =>{
-            resetForm(imagePreview, formImage, form, buttonValidatePhoto);
+            resetForm(imagePreview, formImage, form, buttonValidatePhoto, errorForm, errorImg, errorSize);
             closeModal();
             returnModal(modal, displayAdd, displayWorks);
 
@@ -347,6 +383,7 @@ function setupModal(buttonAddPhoto, modal, displayWorks, displayAdd) {
     if (buttonAddPhoto) {
         buttonAddPhoto.addEventListener('click', () => {
             if (displayWorks) {
+                displayWorks.setAttribute('aria-hidden', 'true');
                 if (modal) {
                     modal.classList.add('overflow');
                     displayWorks.classList.add('opacity');
@@ -358,6 +395,7 @@ function setupModal(buttonAddPhoto, modal, displayWorks, displayAdd) {
             }
             setTimeout(() => {
                 if (displayAdd) {
+                    displayAdd.setAttribute('aria-hidden', 'false');
                     displayAdd.classList.add('open');
                 }
             }, 200);
@@ -400,7 +438,7 @@ async function updateProjects(token){
 }
 
 // fonction pour envoyer le nouveau projet via l'API
-async function sendNewProject(form, file, title, category, token, imagePreview, formImage, buttonValidatePhoto){
+async function sendNewProject(form, file, title, category, token, imagePreview, errorForm, errorImg, errorSize, formImage, buttonValidatePhoto){
     console.log("sendNewProject", token)
     const formData = new FormData(); // utilisation de FormData pour multipart/form-data
     if(file && title && category){
@@ -439,8 +477,9 @@ async function sendNewProject(form, file, title, category, token, imagePreview, 
                 }
                 if(submitSuccess){
                     submitSuccess.classList.remove('hidden');
+                    submitSuccess.setAttribute('aria-hidden', 'false')
                 }
-                resetForm(imagePreview, formImage, form, buttonValidatePhoto);
+                resetForm(imagePreview, formImage, form, buttonValidatePhoto, errorForm, errorImg, errorSize);
                 updateProjects(token);
                 console.log('Succès :', result);
             }
@@ -459,12 +498,14 @@ function imgPreview(file, imagePreview){
     const imageUpload = document.querySelector('.image-upload')
     if(imagePreview){
         imagePreview.src = imageUrl;
+        imagePreview.setAttribute('aria-hidden', 'false')
     }
     if(previewContainer){
         previewContainer.classList.add('image');
     }
     if(imageUpload){
-        imageUpload.classList.add('hidden');       
+        imageUpload.classList.add('hidden');
+        imageUpload.setAttribute('aria-hidden', 'true')       
     }
     
 }
@@ -473,19 +514,22 @@ function imgPreview(file, imagePreview){
 function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, errorSize, imagePreview, uploadButton, token) {
     console.log("setupFormValidation",token)
     if (form) {
-        form.addEventListener('focus', () => {
+        form.addEventListener('input', () => {
             if (formTitle && formCategories && formImage) {
                 if (!formTitle.value && formCategories.value) {
                     if (errorForm) {
                         errorForm.classList.add('visible');
+                        errorForm.setAttribute('aria-hidden', 'false')
                     }
                 } else {
                     if (errorForm) {
                         errorForm.classList.remove('visible');
+                        errorForm.setAttribute('aria-hidden', 'true')
                     }
                 }
 
                 if (formTitle.value && formCategories.value && formImage.files.length > 0) {
+                    console.log(formImage.files.length)
                     if (buttonValidatePhoto) {
                         buttonValidatePhoto.disabled = false;
                         buttonValidatePhoto.classList.add('enabled');
@@ -512,6 +556,7 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                 if (!validExtensions.includes(fileExtension)){
                     if (errorImg) {
                         errorImg.classList.add('visible');
+                        errorImg.setAttribute('aria-hidden', 'false')
                     }
                     formImage.value = null;
                     console.log("Ce fichier n'est pas une image.");
@@ -519,6 +564,7 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                 if (file.size > maxSizeInBytes) {
                     if (errorSize) {
                         errorSize.classList.add('visible');
+                        errorSize.setAttribute('aria-hidden', 'false')
                     }
                     formImage.value = null;
                     console.log("La taille de l'image dépasse 4 Mo.");
@@ -531,14 +577,17 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
             if (errorImg) {
                 if(errorImg.classList.contains('visible'))
                     errorImg.classList.remove('visible');
+                    errorImg.setAttribute('aria-hidden', 'true')
             }
             if (errorSize) {
                 if(errorSize.classList.contains('visible'))
                     errorSize.classList.remove('visible');
+                    errorSize.setAttribute('aria-hidden', 'true')
             }
             const submitSuccess = document.querySelector('.submit-success');
             if(submitSuccess){
                 submitSuccess.classList.add('hidden');
+                submitSuccess.setAttribute('aria-hidden', 'true')
             }
         })
     }
@@ -546,7 +595,7 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
         event.preventDefault();
         const file = formImage.files[0];
         if (formTitle.value && formCategories.value && formImage.files.length > 0){
-            sendNewProject(form, file, formTitle.value, formCategories.value, token, imagePreview, formImage, buttonValidatePhoto);
+            sendNewProject(form, file, formTitle.value, formCategories.value, token, imagePreview, errorForm, errorImg, errorSize, formImage, buttonValidatePhoto);
         } 
     })
     
@@ -588,14 +637,19 @@ async function loadModal(token, addPhotoLoaded){
         }
         if(modalContainer){
             modalContainer.classList.remove('close');
+            modalContainer.setAttribute('aria-hidden', 'false');
             modalContainer.addEventListener('click', (event) => {
                 if (event.target === event.currentTarget){
+                    modalContainer.setAttribute('aria-hidden', 'true');
                     closeModal();
                 };          
             });
         }
         if(iconeClose){
             iconeClose.addEventListener('click', () => {
+                if(modalContainer){
+                    modalContainer.setAttribute('aria-hidden', 'true');
+                }
                 closeModal(); 
             });
         } return addPhotoLoaded
@@ -614,17 +668,31 @@ function errorModal(){
     const iconeClose = document.querySelector('.fa-xmark')
     const displayWorks = document.querySelector('.display-works');
     const displayAdd = document.querySelector('.display-add');
+    const errorHttpAdd = displayAdd.querySelector('.error-http');
+    const errorHttpWorks = displayWorks.querySelector('.error-http');
+    const errorSuppr = displayWorks.querySelector('.error-suppr');
     body.classList.add('hidden');
     if(modalWorks){
         modalWorks.innerHTML = "";
     }
     if(modalContainer){
         modalContainer.classList.remove('close');
+        modalContainer.setAttribute('aria-hidden', 'false');
         modalContainer.addEventListener('click', (event) => {
             if (event.target === event.currentTarget){
                 closeModal();
-                displayWorks.classList.remove('error-server');
-                displayAdd.classList.remove('error-server');
+                if(displayWorks){
+                    displayWorks.classList.remove('error-server');
+                    if(errorHttpWorks){
+                        errorHttpWorks.setAttribute('aria-hidden', 'true');  
+                    }
+                }
+                if(displayAdd){
+                    displayAdd.classList.remove('error-server');
+                    if(errorHttpAdd){
+                        errorHttpAdd.setAttribute('aria-hidden', 'true');  
+                    }
+                }
             };          
         });
     }
@@ -632,16 +700,36 @@ function errorModal(){
         displayWorks.classList.add('error-server');
         if(displayWorks.classList.contains('error-suppr-http')){
             displayWorks.classList.remove('error-suppr-http');
+            if(errorSuppr){
+                errorSuppr.setAttribute('aria-hidden', 'true');
+            }
+        }
+        if(errorHttpWorks){
+            errorHttpWorks.setAttribute('aria-hidden', 'false');
         }
     }
     if(displayAdd){
         displayAdd.classList.add('error-server');
+        if(errorHttpAdd){
+            errorHttpAdd.setAttribute('aria-hidden', 'false');
+        }
+
     }
     if(iconeClose){
         iconeClose.addEventListener('click', () => {
             closeModal();
-            displayWorks.classList.remove('error-server');
-            displayAdd.classList.remove('error-server'); 
+            if(displayWorks){
+                displayWorks.classList.remove('error-server');
+                if(errorHttpWorks){
+                    errorHttpWorks.setAttribute('aria-hidden', 'true');  
+                }
+            }
+            if(displayAdd){
+                displayAdd.classList.remove('error-server');
+                if(errorHttpAdd){
+                    errorHttpAdd.setAttribute('aria-hidden', 'true');  
+                }
+            } 
         });
     }    
 }
@@ -656,6 +744,7 @@ export async function init() {
         const projectsTitle = document.querySelector('.projects-title');
         const btnsContainer = document.querySelector('.btns-container');
         const modalListeners = document.querySelectorAll('.open-modal');
+        const editOnly = document.querySelectorAll('.edit-only');
         if(loginLink){
             loginLink.textContent = 'logout';
             loginLink.href = "./index.html";
@@ -663,9 +752,15 @@ export async function init() {
                 logout('authToken');
             });
         }
+        if(editOnly){
+            editOnly.forEach(editElem => {
+                editElem.setAttribute('aria-hidden', 'false');
+            })            
+        }
         if(btnsContainer){        
             btnsContainer.classList.toggle('hidden');
-        }
+            btnsContainer.setAttribute('aria-hidden', 'true');
+        }        
         body.classList.toggle('edit-mode');
         if(projectsTitle){
             projectsTitle.classList.toggle('edit-mode');
