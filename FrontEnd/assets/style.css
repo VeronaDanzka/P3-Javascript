@@ -684,7 +684,11 @@ body.hidden {
 .image-upload.hidden{
 	display:none;
 }
+.image-preview.hidden{
+	display:none;
+}
 .image-preview{
+	display:block;
 	max-height: 193px;
 	object-fit:cover;
 }

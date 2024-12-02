@@ -321,7 +321,8 @@ function resetForm(imagePreview, formImage, form, buttonValidatePhoto, errorForm
         formImage.value = null;
     }
     if (imagePreview) {
-        imagePreview.src = '';
+        imagePreview.src = '#';
+        imagePreview.classList.add('hidden');
         imagePreview.setAttribute('aria-hidden', 'true');
     }           
     if(imageUploadHidden){
@@ -411,6 +412,7 @@ function setupModal(buttonAddPhoto, modal, displayWorks, displayAdd) {
 // fonction pour créer les options de catégories dans select
 function createCategories(categorySelect, categories) {
     if (categorySelect) {
+        categorySelect.required = true;
         const firstOption = document.createElement('option');
         firstOption.value = "";
         firstOption.disabled = true;
@@ -495,17 +497,20 @@ async function sendNewProject(form, file, title, category, token, imagePreview, 
 function imgPreview(file, imagePreview){
     const imageUrl = URL.createObjectURL(file);
     const previewContainer = document.getElementById('preview-container');
-    const imageUpload = document.querySelector('.image-upload')
+    const imageUpload = document.querySelector('.image-upload');
     if(imagePreview){
         imagePreview.src = imageUrl;
-        imagePreview.setAttribute('aria-hidden', 'false')
+        if(imagePreview.classList.contains('hidden')){
+            imagePreview.classList.remove('hidden');
+        }
+        imagePreview.setAttribute('aria-hidden', 'false');
     }
     if(previewContainer){
         previewContainer.classList.add('image');
     }
     if(imageUpload){
         imageUpload.classList.add('hidden');
-        imageUpload.setAttribute('aria-hidden', 'true')       
+        imageUpload.setAttribute('aria-hidden', 'true');       
     }
     
 }
