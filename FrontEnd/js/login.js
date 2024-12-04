@@ -33,17 +33,17 @@ function setCookie(name, value, days) {
 // Fonction pour récupérer la valeur d'un cookie
 export function getCookieValue(name) {
     if (document.cookie) {
-        console.log(document.cookie)
-        const cookies = document.cookie.split('; ');
-        for (const cookie of cookies) {
-            const [key, value] = cookie.split('=');
-            if (key === name) {
-                console.log(value)
-                return decodeURIComponent(value); // dans le cas où le cookie contiendrait un caractère spécial
-            }
-            else {
-                return null
-            }
+        if(document.cookie.includes(name)){
+            const cookies = document.cookie.split('; ');
+                for (const cookie of cookies) {
+                    const [key, value] = cookie.split('=');
+                    if (key === name) {
+                        return decodeURIComponent(value); // dans le cas où le cookie contiendrait un caractère spécial
+                    }
+
+                }
+        }else{
+            return null;
         }
     } else {
         return null;
@@ -73,7 +73,6 @@ function submitLogin() {
                 try {
                     const response = await loginPostApi(`${apiUrl}${apiPost[0]}`, postJson);
                     setCookie("authToken", response.token, 21) // Enregistre le token pour les prochaines sessions
-                    console.log(response.token)
                     window.location.href = "../index.html"; // Redirige vers la page d'accueil pour activer le mode edit
                 } catch (error) {
                     const inputs = formLogin.querySelectorAll('input');
