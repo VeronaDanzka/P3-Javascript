@@ -321,6 +321,10 @@ footer nav li {
 .border-edit .fa-pen-to-square{
 	color:white;
 	margin-right: 10px;
+	cursor: pointer;
+}
+.border-edit span{
+	cursor: pointer;
 }
 .edit-only {
     display: none;

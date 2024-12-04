@@ -19,7 +19,6 @@ async function loadApi(api) {
         // Retourne les données JSON si tout va bien
         return await dataResponse.json();
     } catch (error) {
-        console.error(`Erreur lors de la requête vers ${api}:`, error);
         throw error;
     }
 }
@@ -37,7 +36,6 @@ async function loadData() {
 
         return data;
     } catch (error) {
-        console.error("Erreur lors du chargement des données :", error);
         // Retourner un objet vide pour éviter les erreurs dans le reste du code
         return {};
     }
@@ -140,7 +138,6 @@ function logout(name) {
 
 // fonction pour api fetch delete
 async function deleteWorkApi(api, apiDelete, workId, token){
-    console.log("deleteWorkApi", token)
     try {
         const dataResponse = await fetch(`${api}${apiDelete[0]}/${workId}`, {
             method: "delete",
@@ -163,7 +160,6 @@ async function deleteWorkApi(api, apiDelete, workId, token){
 
 // fonction pour supprimer des works 
 async function deleteWork(works, token, addPhotoLoaded) {
-    console.log("deleteWork", token)
     const figures = document.querySelectorAll('.modal-works figure');
     if(figures){
         figures.forEach(figure => {
@@ -186,7 +182,6 @@ async function deleteWork(works, token, addPhotoLoaded) {
                         for (const work of works) {
                             if (`work-${work.id}` === btnsDelete.id) {
                                 try {
-                                    console.log(work.id);
                                     const displayWorks = document.querySelector('.display-works');
                                     const errorHttpWorks = displayWorks.querySelector('.error-http');
                                     const errorSuppr = displayWorks.querySelector('.error-suppr');
@@ -213,7 +208,6 @@ async function deleteWork(works, token, addPhotoLoaded) {
                                     // mise à jour des works background
                                     const newWorks = works.filter(work => `work-${work.id}` !== btnsDelete.id);
                                     createWorks(newWorks);
-                                    console.log("new works:",newWorks)
                                     
                                 } catch (error) {
                                     const displayWorks = document.querySelector('.display-works');
@@ -224,9 +218,6 @@ async function deleteWork(works, token, addPhotoLoaded) {
                                                 errorSuppr.setAttribute('aria-hidden', 'false')
                                             }
                                         }
-                                       
-                                    
-                                    console.log(error);
                                     
                                 }
                             }
@@ -340,7 +331,6 @@ function resetForm(imagePreview, formImage, form, buttonValidatePhoto, errorForm
 
 // fonction pour l'ajout photo de la modale
 function addPhoto(categories, token) {
-    console.log("addPhoto", token)
     const modal = document.querySelector('.modal');
     const buttonAddPhoto = document.getElementById('add-work');
     const displayAdd = document.querySelector('.display-add');
@@ -441,7 +431,6 @@ async function updateProjects(token){
 
 // fonction pour envoyer le nouveau projet via l'API
 async function sendNewProject(form, file, title, category, token, imagePreview, errorForm, errorImg, errorSize, formImage, buttonValidatePhoto){
-    console.log("sendNewProject", token)
     const formData = new FormData(); // utilisation de FormData pour multipart/form-data
     if(file && title && category){
         formData.append('image', file); 
@@ -483,10 +472,8 @@ async function sendNewProject(form, file, title, category, token, imagePreview, 
                 }
                 resetForm(imagePreview, formImage, form, buttonValidatePhoto, errorForm, errorImg, errorSize);
                 updateProjects(token);
-                console.log('Succès :', result);
             }
         } catch (error) {
-            console.error('Erreur réseau :', error);
             errorModal();
         }
     } 
@@ -517,7 +504,6 @@ function imgPreview(file, imagePreview){
 
 // fonction pour vérifier la validité du formulaire 
 function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, errorSize, imagePreview, uploadButton, token) {
-    console.log("setupFormValidation",token)
     if (form) {
         form.addEventListener('input', () => {
             if (formTitle && formCategories && formImage) {
@@ -534,7 +520,6 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                 }
 
                 if (formTitle.value && formCategories.value && formImage.files.length > 0) {
-                    console.log(formImage.files.length)
                     if (buttonValidatePhoto) {
                         buttonValidatePhoto.disabled = false;
                         buttonValidatePhoto.classList.add('enabled');
@@ -555,7 +540,6 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                 const maxSizeInBytes = 4 * 1024 * 1024;
                 const fileExtension = file.name.split('.').pop().toLowerCase();
                 if (validExtensions.includes(fileExtension) && file.size <= maxSizeInBytes) {
-                    console.log('Ceci est une image.');
                     imgPreview(file, imagePreview);
                 } 
                 if (!validExtensions.includes(fileExtension)){
@@ -564,7 +548,6 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                         errorImg.setAttribute('aria-hidden', 'false')
                     }
                     formImage.value = null;
-                    console.log("Ce fichier n'est pas une image.");
                 }
                 if (file.size > maxSizeInBytes) {
                     if (errorSize) {
@@ -572,7 +555,6 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                         errorSize.setAttribute('aria-hidden', 'false')
                     }
                     formImage.value = null;
-                    console.log("La taille de l'image dépasse 4 Mo.");
                 }
             }
         });
@@ -608,7 +590,6 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
 
 // fonction pour ouvrir et charger la modale 
 async function loadModal(token, addPhotoLoaded){
-    console.log("loadModal",token)
     try{
         const dataLoaded = await loadData();    
         const works = dataLoaded.works
@@ -659,7 +640,6 @@ async function loadModal(token, addPhotoLoaded){
             });
         } return addPhotoLoaded
     }catch(error){
-        console.log(error)
         errorModal()
         return addPhotoLoaded  
     } 
@@ -771,22 +751,17 @@ export async function init() {
             projectsTitle.classList.toggle('edit-mode');
         }
         let addPhotoLoaded = false;
-        console.log(addPhotoLoaded)
         if(modalListeners){
             modalListeners.forEach(listener => {
                 listener.addEventListener('click', async () => {                
                     if (dataLoaded.works && dataLoaded.categories) {
                         addPhotoLoaded = await loadModal(token, addPhotoLoaded);
-                        console.log(addPhotoLoaded)
                     } else {
                         errorModal();
                     }
                 })
             });
         }
-        console.log("Token trouvé :", token);
-    } else {
-        console.log("Aucun token trouvé.");
     }
     // Vérifiez que les données sont valides avant de créer les boutons et les works
     if (dataLoaded.works && dataLoaded.categories) {
@@ -796,6 +771,4 @@ export async function init() {
     } else {
         errorApi(); // Si les données ne sont pas valides, afficher une erreur
     }
-    console.log("Works:", dataLoaded.works || "Aucun work chargé");
-    console.log("Categories:", dataLoaded.categories || "Aucune catégorie chargée");
 }
