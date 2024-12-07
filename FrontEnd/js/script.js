@@ -69,7 +69,8 @@ function createWorks(works) {
         gallery.innerHTML = "";
         works.forEach(work => {
             const figure = document.createElement('figure');
-            figure.classList.add('figureFilter', `category-${work.categoryId}`);
+            figure.classList.add('figureFilter');
+            figure.dataset.workCategory = work.categoryId;
             const img = document.createElement('img');
             img.src = work.imageUrl;
             img.alt = work.title;
@@ -85,7 +86,7 @@ function createWorks(works) {
 // Fonction pour filtrer les works
 function filtreWorks(figures, button) {
     figures.forEach(figure => {
-        if (figure.classList.contains(`category-${button.dataset.category}`) || (button.dataset.category === "all")) {
+        if (figure.dataset.workCategory === button.dataset.category || button.dataset.category === "all") {
             setTimeout(() => {
                 if (figure.classList.contains('hidden')){
                     figure.classList.remove('hidden');
@@ -282,27 +283,24 @@ function returnModal(modal, displayAdd, displayWorks){
 }
 
 // fonction pour reset le formulaire 
-function resetForm(imagePreview, formImage, form, buttonValidatePhoto, errorForm, errorImg, errorSize){
+function resetForm(form, buttonValidatePhoto, errorObject){
     const imageUploadHidden = document.querySelector('.image-upload.hidden');
     const previewContainer = document.getElementById('preview-container');
-    if (errorForm) {
-        if(errorForm.classList.contains('visible')){
-            errorForm.classList.remove('visible');
-            errorForm.setAttribute('aria-hidden', 'true');
+    const imagePreview = document.getElementById('image-preview');
+    const formImage = document.getElementById('image'); 
+    if (errorObject.errorForm && errorObject.errorForm.classList.contains('visible')) {
+            errorObject.errorForm.classList.remove('visible');
+            errorObject.errorForm.setAttribute('aria-hidden', 'true');
         }
-    }
-    if (errorImg) {
-        if(errorImg.classList.contains('visible')){
-            errorImg.classList.remove('visible');
+    if (errorObject.errorImg && errorObject.errorImg.classList.contains('visible')) {
+            errorObject.errorImg.classList.remove('visible');
             errorImg.setAttribute('aria-hidden', 'true');
-        }
+    
     }
-    if (errorSize) {
-        if(errorSize.classList.contains('visible')){
-            errorSize.classList.remove('visible');
-            errorSize.setAttribute('aria-hidden', 'true');
+    if (errorObject.errorSize && errorObject.errorSize.classList.contains('visible')) {
+            errorObject.errorSize.classList.remove('visible');
+            errorObject.errorSize.setAttribute('aria-hidden', 'true');
         }
-    }
     if(form){ 
         const select = form.elements['categories'];
         form.reset();
@@ -338,21 +336,29 @@ function addPhoto(categories, token) {
     const categorySelect = document.getElementById('categories');
     const buttonValidatePhoto = document.querySelector('.add-photo-btn');
     const form = document.getElementById('image-upload-form');
-    const formTitle = document.getElementById('title');
-    const formCategories = document.getElementById('categories');
-    const formImage = document.getElementById('image');
     const errorForm = document.querySelector('.error-form');
-    const uploadButton = document.getElementById('upload-button');
     const errorImg = document.querySelector('.error-img');
     const errorSize = document.querySelector('.error-size');
     const returnIcone = document.querySelector('.fa-arrow-left');
     const closeIcone = displayAdd.querySelector('.fa-xmark');
     const imagePreview = document.getElementById('image-preview');
+    const errorObject = {};
+    if (errorForm) {
+        errorObject.errorForm = errorForm;
+    }
+    if (errorImg) {
+        errorObject.errorImg = errorImg;
+    }
+    if (errorSize) {
+        errorObject.errorSize = errorSize;
+    }
+
+
 
 
     setupModal(buttonAddPhoto, modal, displayWorks, displayAdd);
     createCategories(categorySelect, categories);
-    setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, errorSize, imagePreview, uploadButton, token);    
+    setupFormValidation(form, errorObject, imagePreview, token);    
     if(returnIcone){
         returnIcone.addEventListener('click', () =>{
             returnModal(modal, displayAdd, displayWorks);
@@ -360,7 +366,7 @@ function addPhoto(categories, token) {
     }
     if(closeIcone){
         closeIcone.addEventListener('click', () =>{
-            resetForm(imagePreview, formImage, form, buttonValidatePhoto, errorForm, errorImg, errorSize);
+            resetForm(form, buttonValidatePhoto, errorObject);
             closeModal();
             returnModal(modal, displayAdd, displayWorks);
 
@@ -430,52 +436,54 @@ async function updateProjects(token){
 }
 
 // fonction pour envoyer le nouveau projet via l'API
-async function sendNewProject(form, file, title, category, token, imagePreview, errorForm, errorImg, errorSize, formImage, buttonValidatePhoto){
-    const formData = new FormData(); // utilisation de FormData pour multipart/form-data
-    if(file && title && category){
-        formData.append('image', file); 
-        formData.append('title', title); 
-        formData.append('category', category);
-        try {
-            const response = await fetch(`${apiUrl}${apiPost[1]}`, {
-                method: 'POST',
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: formData,
-            });
+async function sendNewProject(form, file, title, category, token, errorObject){
+    if (form) {
+        const buttonValidatePhoto = form.querySelector('.add-photo-btn');
+        const formData = new FormData(); // utilisation de FormData pour multipart/form-data
+        if(file && title && category){
+            formData.append('image', file); 
+            formData.append('title', title); 
+            formData.append('category', category);
+            try {
+                const response = await fetch(`${apiUrl}${apiPost[1]}`, {
+                    method: 'POST',
+                    headers: {
+                        'accept': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
 
-            if (response.ok) {
-                const result = await response.json();
-                const displayAdd = document.querySelector('.display-add');
-                const displayWorks = document.querySelector('.display-works');
-                const submitSuccess = document.querySelector('.submit-success.hidden');
-                if(displayAdd){
-                    if(displayAdd.classList.contains('error-server')){
-                        displayAdd.classList.remove('error-server');
+                if (response.ok) {
+                    const displayAdd = document.querySelector('.display-add');
+                    const displayWorks = document.querySelector('.display-works');
+                    const submitSuccess = document.querySelector('.submit-success.hidden');
+                    if(displayAdd){
+                        if(displayAdd.classList.contains('error-server')){
+                            displayAdd.classList.remove('error-server');
+                        }
+                        
                     }
-                    
-                }
-                if(displayWorks){
-                    if(displayWorks.classList.contains('error-server')){
-                        displayWorks.classList.remove('error-server');
+                    if(displayWorks){
+                        if(displayWorks.classList.contains('error-server')){
+                            displayWorks.classList.remove('error-server');
+                        }
+                        if(displayWorks.classList.contains('error-suppr-http')){
+                            displayWorks.classList.remove('error-suppr-http');
+                        }
+                        
                     }
-                    if(displayWorks.classList.contains('error-suppr-http')){
-                        displayWorks.classList.remove('error-suppr-http');
+                    if(submitSuccess){
+                        submitSuccess.classList.remove('hidden');
+                        submitSuccess.setAttribute('aria-hidden', 'false')
                     }
-                    
+                    resetForm(form, buttonValidatePhoto, errorObject);
+                    updateProjects(token);
                 }
-                if(submitSuccess){
-                    submitSuccess.classList.remove('hidden');
-                    submitSuccess.setAttribute('aria-hidden', 'false')
-                }
-                resetForm(imagePreview, formImage, form, buttonValidatePhoto, errorForm, errorImg, errorSize);
-                updateProjects(token);
+            } catch (error) {
+                errorModal();
             }
-        } catch (error) {
-            errorModal();
-        }
+        } 
     } 
         
 }
@@ -503,22 +511,26 @@ function imgPreview(file, imagePreview){
 }
 
 // fonction pour vérifier la validité du formulaire 
-function setupFormValidation(form, formTitle, formCategories, formImage, buttonValidatePhoto, errorForm, errorImg, errorSize, imagePreview, uploadButton, token) {
+function setupFormValidation(form, errorObject, imagePreview, token) {
     if (form) {
+        const formTitle = document.getElementById('title');
+        const formCategories = document.getElementById('categories');
+        const formImage = document.getElementById('image');
+        const uploadButton = document.getElementById('upload-button');
+        const buttonValidatePhoto = form.querySelector('.add-photo-btn')
         form.addEventListener('input', () => {
             if (formTitle && formCategories && formImage) {
                 if (!formTitle.value && formCategories.value) {
-                    if (errorForm) {
-                        errorForm.classList.add('visible');
-                        errorForm.setAttribute('aria-hidden', 'false')
+                    if (errorObject.errorForm) {
+                        errorObject.errorForm.classList.add('visible');
+                        errorObject.errorForm.setAttribute('aria-hidden', 'false')
                     }
                 } else {
-                    if (errorForm) {
-                        errorForm.classList.remove('visible');
-                        errorForm.setAttribute('aria-hidden', 'true')
+                    if (errorObject.errorForm) {
+                        errorObject.errorForm.classList.remove('visible');
+                        errorObject.errorForm.setAttribute('aria-hidden', 'true')
                     }
                 }
-
                 if (formTitle.value && formCategories.value && formImage.files.length > 0) {
                     if (buttonValidatePhoto) {
                         buttonValidatePhoto.disabled = false;
@@ -531,67 +543,68 @@ function setupFormValidation(form, formTitle, formCategories, formImage, buttonV
                 }
             }            
         });
-    }
-    if(formImage){
-        formImage.addEventListener('change', () => {
-            if (formImage.files.length > 0) {
-                const validExtensions = ['jpg', 'jpeg', 'png'];
-                const file = formImage.files[0];
-                const maxSizeInBytes = 4 * 1024 * 1024;
-                const fileExtension = file.name.split('.').pop().toLowerCase();
-                if (validExtensions.includes(fileExtension) && file.size <= maxSizeInBytes) {
-                    imgPreview(file, imagePreview);
-                } 
-                if (!validExtensions.includes(fileExtension)){
-                    if (errorImg) {
-                        errorImg.classList.add('visible');
-                        errorImg.setAttribute('aria-hidden', 'false')
-                    }
-                    formImage.value = null;
-                }
-                if (file.size > maxSizeInBytes) {
-                    if (errorSize) {
-                        errorSize.classList.add('visible');
-                        errorSize.setAttribute('aria-hidden', 'false')
-                    }
-                    formImage.value = null;
-                }
-            }
-        });
-    }    
-    if(uploadButton){
-        uploadButton.addEventListener('click', () =>{
-            if (errorImg) {
-                if(errorImg.classList.contains('visible'))
-                    errorImg.classList.remove('visible');
-                    errorImg.setAttribute('aria-hidden', 'true')
-            }
-            if (errorSize) {
-                if(errorSize.classList.contains('visible'))
-                    errorSize.classList.remove('visible');
-                    errorSize.setAttribute('aria-hidden', 'true')
-            }
-            const submitSuccess = document.querySelector('.submit-success');
-            if(submitSuccess){
-                submitSuccess.classList.add('hidden');
-                submitSuccess.setAttribute('aria-hidden', 'true')
-            }
+        form.addEventListener('submit', (event) =>{
+            event.preventDefault();
+            const file = formImage.files[0];
+            if (formTitle.value && formCategories.value && formImage.files.length > 0){
+                sendNewProject(form, file, formTitle.value, formCategories.value, token, errorObject);
+            } 
         })
+        if(formImage){
+            formImage.addEventListener('change', () => {
+                if (formImage.files.length > 0) {
+                    const validExtensions = ['jpg', 'jpeg', 'png'];
+                    const file = formImage.files[0];
+                    const maxSizeInBytes = 4 * 1024 * 1024;
+                    const fileExtension = file.name.split('.').pop().toLowerCase();
+                    if (validExtensions.includes(fileExtension) && file.size <= maxSizeInBytes) {
+                        imgPreview(file, imagePreview);
+                    } 
+                    if (!validExtensions.includes(fileExtension)){
+                        if (errorObject.errorImg) {
+                            errorObject.errorImg.classList.add('visible');
+                            errorObject.errorImg.setAttribute('aria-hidden', 'false')
+                        }
+                        formImage.value = null;
+                    }
+                    if (file.size > maxSizeInBytes) {
+                        if (errorObject.errorSize) {
+                            errorObject.errorSize.classList.add('visible');
+                            errorObject.errorSize.setAttribute('aria-hidden', 'false')
+                        }
+                        formImage.value = null;
+                    }
+                }
+            });
+        }    
+        if(uploadButton){
+            uploadButton.addEventListener('click', () =>{
+                if (errorObject.errorImg) {
+                    if(errorObject.errorImg.classList.contains('visible'))
+                        errorObject.errorImg.classList.remove('visible');
+                    errorObject.errorImg.setAttribute('aria-hidden', 'true')
+                }
+                if (errorObject.errorSize) {
+                    if(errorObject.errorSize.classList.contains('visible'))
+                        errorObject.errorSize.classList.remove('visible');
+                    errorObject.errorSize.setAttribute('aria-hidden', 'true')
+                }
+                const submitSuccess = document.querySelector('.submit-success');
+                if(submitSuccess){
+                    submitSuccess.classList.add('hidden');
+                    submitSuccess.setAttribute('aria-hidden', 'true')
+                }
+            })
+        }
     }
-    form.addEventListener('submit', (event) =>{
-        event.preventDefault();
-        const file = formImage.files[0];
-        if (formTitle.value && formCategories.value && formImage.files.length > 0){
-            sendNewProject(form, file, formTitle.value, formCategories.value, token, imagePreview, errorForm, errorImg, errorSize, formImage, buttonValidatePhoto);
-        } 
-    })
     
 }
 
 // fonction pour ouvrir et charger la modale 
 async function loadModal(token, addPhotoLoaded){
     try{
-        const dataLoaded = await loadData();    
+        const dataLoaded = await loadData();
+        console.log(dataLoaded)    
         const works = dataLoaded.works
         const categories = dataLoaded.categories
         const modalContainer = document.querySelector('.modal-container');
@@ -640,6 +653,7 @@ async function loadModal(token, addPhotoLoaded){
             });
         } return addPhotoLoaded
     }catch(error){
+        console.log(error)
         errorModal()
         return addPhotoLoaded  
     } 
@@ -723,6 +737,7 @@ function errorModal(){
 export async function init() {
     const dataLoaded = await loadData();
     const token = getCookieValue('authToken');
+    console.log(dataLoaded)
     if (token) {
         const body = document.querySelector('body');
         const loginLink = document.querySelector('#login');

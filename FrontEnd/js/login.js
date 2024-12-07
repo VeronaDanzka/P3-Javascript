@@ -32,19 +32,16 @@ function setCookie(name, value, days) {
 
 // Fonction pour récupérer la valeur d'un cookie
 export function getCookieValue(name) {
-    if (document.cookie) {
-        if(document.cookie.includes(name)){
-            const cookies = document.cookie.split('; ');
-                for (const cookie of cookies) {
-                    const [key, value] = cookie.split('=');
-                    if (key === name) {
-                        return decodeURIComponent(value); // dans le cas où le cookie contiendrait un caractère spécial
-                    }
-
+    if (document.cookie && (document.cookie.includes(name))) {
+        const cookies = document.cookie.split('; ');
+            for (const cookie of cookies) {
+                const [key, value] = cookie.split('=');
+                if (key === name) {
+                    return decodeURIComponent(value); // dans le cas où le cookie contiendrait un caractère spécial
                 }
-        }else{
-            return null;
-        }
+
+            }
+
     } else {
         return null;
     }
@@ -96,9 +93,7 @@ function submitLogin() {
             }
         });
     } else {
-        const body = document.querySelector('body')
-        body.innerHTML = ""
-        window.location.href = "../index.html";      
+        window.location.href = "../index.html"; // cas où l'utilisateur reviens sur la page login.html en étant déjà connecté    
     }
 }
 if (window.location.pathname.includes("login.html")) {
