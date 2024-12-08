@@ -785,7 +785,7 @@ export async function init() {
         const loginLink = document.querySelector('#login');
         const projectsTitle = document.querySelector('.projects-title');
         const btnsContainer = document.querySelector('.btns-container');
-        const modalListeners = document.querySelectorAll('.open-modal');
+        const modalListeners = document.querySelectorAll('[data-role="open-modal"]');
         const editOnly = document.querySelectorAll('.edit-only');
         if(loginLink){
             loginLink.textContent = 'logout';
