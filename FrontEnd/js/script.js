@@ -294,7 +294,7 @@ function resetForm(form, buttonValidatePhoto, errorObject){
         }
     if (errorObject.errorImg && errorObject.errorImg.classList.contains('visible')) {
             errorObject.errorImg.classList.remove('visible');
-            errorImg.setAttribute('aria-hidden', 'true');
+            errorObject.errorImg.setAttribute('aria-hidden', 'true');
     
     }
     if (errorObject.errorSize && errorObject.errorSize.classList.contains('visible')) {
@@ -342,6 +342,9 @@ function addPhoto(categories, token) {
     const returnIcone = document.querySelector('.fa-arrow-left');
     const closeIcone = displayAdd.querySelector('.fa-xmark');
     const imagePreview = document.getElementById('image-preview');
+    const errorHttpAdd = displayAdd.querySelector('.error-http');
+    const errorHttpWorks = displayWorks.querySelector('.error-http');
+    const errorSuppr = displayWorks.querySelector('.error-suppr');
     const errorObject = {};
     if (errorForm) {
         errorObject.errorForm = errorForm;
@@ -366,11 +369,27 @@ function addPhoto(categories, token) {
     }
     if(closeIcone){
         closeIcone.addEventListener('click', () =>{
-            resetForm(form, buttonValidatePhoto, errorObject);
-            closeModal();
-            returnModal(modal, displayAdd, displayWorks);
-
-            
+                if(displayWorks){
+                    displayWorks.classList.remove('error-server');
+                    if(errorHttpWorks){
+                        errorHttpWorks.setAttribute('aria-hidden', 'true');  
+                    }
+                    if(displayWorks.classList.contains('error-suppr-http')){
+                        displayWorks.classList.remove('error-suppr-http');
+                        if(errorSuppr){
+                            errorSuppr.setAttribute('aria-hidden', 'true');
+                        }
+                    }
+                }
+                if(displayAdd){
+                    displayAdd.classList.remove('error-server');
+                    if(errorHttpAdd){
+                        errorHttpAdd.setAttribute('aria-hidden', 'true');  
+                    }
+                }
+                closeModal();
+                resetForm(form, buttonValidatePhoto, errorObject);
+                returnModal(modal, displayAdd, displayWorks);                     
         })
     }
 }
@@ -603,14 +622,15 @@ function setupFormValidation(form, errorObject, imagePreview, token) {
 // fonction pour ouvrir et charger la modale 
 async function loadModal(token, addPhotoLoaded){
     try{
-        const dataLoaded = await loadData();
-        console.log(dataLoaded)    
+        const dataLoaded = await loadData();    
         const works = dataLoaded.works
         const categories = dataLoaded.categories
         const modalContainer = document.querySelector('.modal-container');
         const modalWorks = document.querySelector('.modal-works');
         const body = document.querySelector('body');
-        const iconeClose = document.querySelector('.fa-xmark')
+        const iconeClose = document.querySelector('.fa-xmark');
+        const displayWorks = document.querySelector('.display-works');
+        const errorSuppr = displayWorks.querySelector('.error-suppr');
         body.classList.add('hidden');
         if(modalWorks){
             modalWorks.innerHTML = "";
@@ -641,6 +661,12 @@ async function loadModal(token, addPhotoLoaded){
                 if (event.target === event.currentTarget){
                     modalContainer.setAttribute('aria-hidden', 'true');
                     closeModal();
+                    if(displayWorks && displayWorks.classList.contains('error-suppr-http')){
+                        displayWorks.classList.remove('error-suppr-http');
+                        if(errorSuppr){
+                            errorSuppr.setAttribute('aria-hidden', 'true');
+                        }
+                    }
                 };          
             });
         }
@@ -649,11 +675,16 @@ async function loadModal(token, addPhotoLoaded){
                 if(modalContainer){
                     modalContainer.setAttribute('aria-hidden', 'true');
                 }
+                if(displayWorks && displayWorks.classList.contains('error-suppr-http')){
+                    displayWorks.classList.remove('error-suppr-http');
+                    if(errorSuppr){
+                        errorSuppr.setAttribute('aria-hidden', 'true');
+                    }
+                }
                 closeModal(); 
             });
         } return addPhotoLoaded
     }catch(error){
-        console.log(error)
         errorModal()
         return addPhotoLoaded  
     } 
@@ -692,6 +723,12 @@ function errorModal(){
                         errorHttpAdd.setAttribute('aria-hidden', 'true');  
                     }
                 }
+                if(displayWorks.classList.contains('error-suppr-http')){
+                    displayWorks.classList.remove('error-suppr-http');
+                    if(errorSuppr){
+                        errorSuppr.setAttribute('aria-hidden', 'true');
+                    }
+                }
             };          
         });
     }
@@ -716,19 +753,25 @@ function errorModal(){
     }
     if(iconeClose){
         iconeClose.addEventListener('click', () => {
-            closeModal();
-            if(displayWorks){
-                displayWorks.classList.remove('error-server');
-                if(errorHttpWorks){
-                    errorHttpWorks.setAttribute('aria-hidden', 'true');  
+                closeModal();
+                if(displayWorks){
+                    displayWorks.classList.remove('error-server');
+                    if(errorHttpWorks){
+                        errorHttpWorks.setAttribute('aria-hidden', 'true');  
+                    }
+                    if(displayWorks.classList.contains('error-suppr-http')){
+                        displayWorks.classList.remove('error-suppr-http');
+                        if(errorSuppr){
+                            errorSuppr.setAttribute('aria-hidden', 'true');
+                        }
+                    }
                 }
-            }
-            if(displayAdd){
-                displayAdd.classList.remove('error-server');
-                if(errorHttpAdd){
-                    errorHttpAdd.setAttribute('aria-hidden', 'true');  
+                if(displayAdd){
+                    displayAdd.classList.remove('error-server');
+                    if(errorHttpAdd){
+                        errorHttpAdd.setAttribute('aria-hidden', 'true');  
+                    }
                 }
-            } 
         });
     }    
 }
@@ -737,7 +780,6 @@ function errorModal(){
 export async function init() {
     const dataLoaded = await loadData();
     const token = getCookieValue('authToken');
-    console.log(dataLoaded)
     if (token) {
         const body = document.querySelector('body');
         const loginLink = document.querySelector('#login');

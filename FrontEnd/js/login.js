@@ -51,47 +51,52 @@ export function getCookieValue(name) {
 function submitLogin() {
     if(!getCookieValue("authToken")){
         const formLogin = document.querySelector(".login-form");
-        formLogin.addEventListener("submit", async (event) => {
-            event.preventDefault();
-            const user = document.querySelector("#email");
-            const password = document.querySelector("#password");
-            let userInput = null
-            let passwordInput = null
-            if(user){
-                userInput = user.value;
-            }
-            if(password){
-                passwordInput = password.value;
-            }
-            if(userInput && passwordInput){
-                const postObject = {"email": userInput,
-                                    "password": passwordInput};
-                const postJson = JSON.stringify(postObject)
-                try {
-                    const response = await loginPostApi(`${apiUrl}${apiPost[0]}`, postJson);
-                    setCookie("authToken", response.token, 21) // Enregistre le token pour les prochaines sessions
-                    window.location.href = "../index.html"; // Redirige vers la page d'accueil pour activer le mode edit
-                } catch (error) {
-                    const inputs = formLogin.querySelectorAll('input');
-                    if (error.message.includes("Failed to fetch")){                    
-                        formLogin.classList.add('error-server');
-                    }
-                    else {
-                        formLogin.classList.add('error');
-                    }
-                    if(inputs){
-                        inputs.forEach( input => {
-                            input.addEventListener('focus', () => {
-                                formLogin.classList.remove('error');
-                                if (error.message.includes("Failed to fetch")){                    
-                                    formLogin.classList.remove('error-server');
-                                } 
-                            })
-                        })
-                    }               
+        if(formLogin){
+            formLogin.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const user = document.querySelector("#email");
+                const password = document.querySelector("#password");
+                let userInput = null
+                let passwordInput = null
+                if(user){
+                    userInput = user.value;
                 }
-            }
-        });
+                if(password){
+                    passwordInput = password.value;
+                }
+                if(userInput && passwordInput){
+                    const postObject = {"email": userInput,
+                                        "password": passwordInput};
+                    const postJson = JSON.stringify(postObject)
+                    try {
+                        const response = await loginPostApi(`${apiUrl}${apiPost[0]}`, postJson);
+                        setCookie("authToken", response.token, 21) // Enregistre le token pour les prochaines sessions
+                        window.location.href = "../index.html"; // Redirige vers la page d'accueil pour activer le mode edit
+                    } catch (error) {
+                        const inputs = formLogin.querySelectorAll('input');
+                        if (error.message.includes("Failed to fetch")){                    
+                            formLogin.classList.add('error-server');
+                        }
+                        else {
+                            if(formLogin.classList.contains('error-server')){
+                                formLogin.classList.remove('error-server');         
+                            }
+                            formLogin.classList.add('error');
+                        }
+                        if(inputs){
+                            inputs.forEach( input => {
+                                input.addEventListener('focus', () => {
+                                    formLogin.classList.remove('error');
+                                    if (error.message.includes("Failed to fetch")){                    
+                                        formLogin.classList.remove('error-server');
+                                    } 
+                                })
+                            })
+                        }               
+                    }
+                }
+            });
+        }
     } else {
         window.location.href = "../index.html"; // cas où l'utilisateur reviens sur la page login.html en étant déjà connecté    
     }
